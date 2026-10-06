@@ -91,29 +91,6 @@
       background: #ffffff;
     }
 
-    /* 配置提示 — 直角 */
-    .config-notice {
-      background: #fff8e6;
-      border-left: 6px solid #f5a623;
-      padding: 1rem 1.4rem;
-      margin-bottom: 1.6rem;
-      font-size: 0.9rem;
-      color: #6b4e0a;
-      border-top: 1px solid #f0d9a0;
-      border-right: 1px solid #f0d9a0;
-      border-bottom: 1px solid #f0d9a0;
-      line-height: 1.5;
-    }
-
-    .config-notice code {
-      background: #fff;
-      padding: 2px 6px;
-      border: 1px solid #e0c68a;
-      font-family: 'Courier New', monospace;
-      font-size: 0.85rem;
-      color: #a05e00;
-    }
-
     /* 引导文本 */
     .intro-text {
       background: #f7f8fc;
@@ -350,7 +327,7 @@
 
     /* 强制无圆角 */
     input, textarea, select, button, .form-control, .btn,
-    .intro-text, .toast-message, .bug-report-card, .config-notice {
+    .intro-text, .toast-message, .bug-report-card {
       border-radius: 0 !important;
     }
 
@@ -373,13 +350,6 @@
     </div>
 
     <div class="card-body">
-      <!-- 配置提醒：首次使用请修改下方 CONFIG 中的仓库信息 -->
-      <div class="config-notice" id="configNotice">
-        ⚙️ <strong>部署提示：</strong>请打开源码找到 <code>&lt;script&gt;</code> 中的
-        <code>GITHUB_CONFIG</code> 对象，将其中的 <code>owner</code> 和
-        <code>repo</code> 替换为您自己的 GitHub 用户名和仓库名。
-      </div>
-
       <div class="intro-text">
         <strong>🐞 发现微信twu的Bug了？</strong> 感谢你帮助改进！<br>
         填写下面的表单，点击提交后会跳转到 GitHub Issues 页面，你可以确认并发布。
@@ -390,7 +360,7 @@
           <div>
             <div class="form-group">
               <label><span class="square-dot"></span>你的昵称 <span class="required">*</span></label>
-              <input type="text" class="form-control" id="nickname" placeholder="例如：小twu" value="微信用户">
+              <input type="text" class="form-control" id="nickname" placeholder="例如：小twu">
             </div>
           </div>
           <div>
@@ -403,7 +373,7 @@
 
         <div class="form-group">
           <label><span class="square-dot"></span>Bug 简要描述 <span class="required">*</span></label>
-          <input type="text" class="form-control" id="bugTitle" placeholder="例如：发送消息后闪退 / 头像不显示" value="消息气泡错位">
+          <input type="text" class="form-control" id="bugTitle" placeholder="例如：发送消息后闪退 / 头像不显示">
         </div>
 
         <div class="row-2col">
@@ -430,15 +400,12 @@
 
         <div class="form-group">
           <label><span class="square-dot"></span>详细描述 <span class="required">*</span></label>
-          <textarea class="form-control" id="bugDescription" placeholder="请描述：什么时候发生的？你点击了什么？期望结果是什么？">在微信twu中，当连续发送三条以上消息时，气泡会轻微重叠，而且头像偶尔会错位。已经尝试刷新页面，依然存在。</textarea>
+          <textarea class="form-control" id="bugDescription" placeholder="请描述：什么时候发生的？你点击了什么？期望结果是什么？"></textarea>
         </div>
 
         <div class="form-group">
           <label><span class="square-dot"></span>复现步骤 (建议填写)</label>
-          <textarea class="form-control" id="steps" placeholder="1. 打开微信twu聊天界面&#10;2. 点击输入框输入文字&#10;3. 快速点击发送三次" style="min-height: 100px;">1. 打开微信twu作品
-2. 进入"文件传输助手"聊天
-3. 连续发送三条短消息
-4. 观察气泡重叠，以及左侧头像偏移</textarea>
+          <textarea class="form-control" id="steps" placeholder="1. 打开微信twu聊天界面&#10;2. 点击输入框输入文字&#10;3. 快速点击发送三次" style="min-height: 100px;"></textarea>
         </div>
 
         <div class="action-buttons">
@@ -458,43 +425,23 @@
   <script>
     /* ============================================================
        ★★★  GitHub 仓库配置  ★★★
-       请将下方 owner 和 repo 修改为您自己的 GitHub 用户名和仓库名。
-       例如：您的 GitHub 用户名是 "myusername"，仓库名是 "wechat-twu-bugs"，
-       则修改为：owner: "myusername", repo: "wechat-twu-bugs"
+       已为您配置好，无需再修改。
        ============================================================ */
     const GITHUB_CONFIG = {
-      owner: "Jiadan209",   // ← 替换为您的 GitHub 用户名
-      repo: "wechat-twu-bugs",          // ← 替换为您的仓库名
-      labels: ["bug", "微信twu"]        // 可选的 Issue 标签
+      owner: "Jiadan209",           // GitHub 用户名
+      repo: "wechat-twu-bugs",      // 仓库名
+      labels: ["bug", "微信twu"]     // Issue 标签
     };
 
     /* ============================================================
-       以下是业务逻辑，通常无需修改
+       以下为业务逻辑，无需修改
        ============================================================ */
 
-    // 检查配置是否已修改
+    // 检查配置是否有效
     function isConfigValid() {
-      return GITHUB_CONFIG.owner !== "your-github-username" &&
-             GITHUB_CONFIG.repo !== "wechat-twu-bugs" &&
-             GITHUB_CONFIG.owner.trim() !== "" &&
+      return GITHUB_CONFIG.owner.trim() !== "" &&
              GITHUB_CONFIG.repo.trim() !== "";
     }
-
-    // 页面加载时检查配置
-    window.addEventListener('DOMContentLoaded', function() {
-      if (!isConfigValid()) {
-        // 配置无效时给出醒目提示
-        const notice = document.getElementById('configNotice');
-        if (notice) {
-          notice.innerHTML = '⚠️ <strong>配置未完成：</strong>请打开源码找到 <code>GITHUB_CONFIG</code>，将 ' +
-            '<code>owner</code> 和 <code>repo</code> 替换为您自己的 GitHub 用户名和仓库名。' +
-            '否则提交按钮将无法工作。';
-          notice.style.background = '#fdeeee';
-          notice.style.borderLeftColor = '#e03a3a';
-          notice.style.color = '#8b1a1a';
-        }
-      }
-    });
 
     // 构建 Issue 内容（Markdown 格式）
     function buildIssueBody() {
@@ -547,7 +494,6 @@
 
     // 提交到 GitHub Issues
     function submitToGitHub() {
-      // 验证必填字段
       const nickname = document.getElementById('nickname').value.trim();
       const bugTitle = document.getElementById('bugTitle').value.trim();
       const bugDesc = document.getElementById('bugDescription').value.trim();
@@ -568,13 +514,11 @@
         return;
       }
 
-      // 检查配置
       if (!isConfigValid()) {
-        alert('⚠️ GitHub 仓库尚未配置！\n\n请打开源码，找到 GITHUB_CONFIG，将 owner 和 repo 修改为您自己的 GitHub 用户名和仓库名。');
+        alert('⚠️ GitHub 仓库尚未配置！');
         return;
       }
 
-      // 生成 URL 并显示提示
       const issueUrl = buildIssueUrl();
       const container = document.getElementById('messageContainer');
 
@@ -591,8 +535,6 @@
       `;
 
       container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-      // 在新标签页打开 GitHub Issue 创建页面
       window.open(issueUrl, '_blank', 'noopener,noreferrer');
     }
 
