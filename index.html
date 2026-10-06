@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>微信twu · Bug汇报站</title>
   <style>
-    /* 全局重置 — 禁用所有圆角 */
     * {
       margin: 0;
       padding: 0;
@@ -19,11 +18,10 @@
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       padding: 1.5rem;
     }
 
-    /* 主卡片 — 直角硬边 */
     .bug-report-card {
       max-width: 820px;
       width: 100%;
@@ -33,12 +31,10 @@
       overflow: hidden;
     }
 
-    /* 头部 */
     .card-header {
       background: #1a1a2e;
       padding: 1.8rem 2.2rem 1.4rem 2.2rem;
       color: white;
-      position: relative;
       border-bottom: 4px solid #07c160;
     }
 
@@ -52,7 +48,6 @@
     .app-title h1 {
       font-size: 2rem;
       font-weight: 600;
-      letter-spacing: -0.02em;
       color: #ffffff;
     }
 
@@ -62,7 +57,6 @@
       font-size: 0.8rem;
       font-weight: 600;
       padding: 4px 14px;
-      letter-spacing: 0.3px;
       border: 1px solid #06ad56;
     }
 
@@ -80,18 +74,15 @@
       background: #2d2d44;
       padding: 3px 12px;
       font-size: 0.85rem;
-      font-weight: 500;
       color: #d0d4f0;
       border: 1px solid #3f3f5e;
     }
 
-    /* 主体 */
     .card-body {
       padding: 2rem 2.2rem 2.2rem 2.2rem;
       background: #ffffff;
     }
 
-    /* 引导文本 */
     .intro-text {
       background: #f7f8fc;
       padding: 1.2rem 1.5rem;
@@ -110,7 +101,147 @@
       font-weight: 700;
     }
 
-    /* 表单组 */
+    /* ============ 已有 Bug 列表样式 ============ */
+    .issues-section {
+      margin-top: 2rem;
+      border-top: 1px dashed #d0d7e3;
+      padding-top: 1.6rem;
+    }
+
+    .issues-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .issues-header h2 {
+      font-size: 1.1rem;
+      color: #1a1a2e;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .issues-header h2 .count-badge {
+      background: #07c160;
+      color: white;
+      font-size: 0.75rem;
+      padding: 2px 10px;
+      font-weight: 600;
+    }
+
+    .refresh-btn {
+      background: #ffffff;
+      border: 1.5px solid #d0d7e3;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #334155;
+      transition: all 0.15s;
+    }
+
+    .refresh-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .refresh-btn:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+
+    .issues-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .issue-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #07c160;
+      transition: all 0.15s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .issue-item:hover {
+      background: #eef4ff;
+      border-left-color: #2563eb;
+    }
+
+    .issue-item.closed {
+      border-left-color: #94a3b8;
+      opacity: 0.75;
+    }
+
+    .issue-status {
+      flex-shrink: 0;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .issue-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .issue-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #0f172a;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .issue-meta {
+      font-size: 0.78rem;
+      color: #7c8b9c;
+      margin-top: 3px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .issue-meta .issue-number {
+      color: #07c160;
+      font-weight: 600;
+    }
+
+    .issues-loading,
+    .issues-empty,
+    .issues-error {
+      padding: 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #7c8b9c;
+    }
+
+    .issues-error {
+      background: #fdeeee;
+      color: #a02020;
+      border-color: #f0c0c0;
+    }
+
+    .issues-empty {
+      color: #07c160;
+      background: #e6f9ed;
+      border-color: #b8e6cc;
+    }
+
+    /* ============ 表单样式 ============ */
     .form-group {
       margin-bottom: 1.8rem;
     }
@@ -123,7 +254,6 @@
       font-size: 0.95rem;
       color: #1e293b;
       margin-bottom: 8px;
-      letter-spacing: 0.2px;
     }
 
     .form-group label .required {
@@ -140,7 +270,6 @@
       margin-right: 4px;
     }
 
-    /* 输入框 */
     .form-control {
       width: 100%;
       padding: 14px 18px;
@@ -177,7 +306,6 @@
       cursor: pointer;
     }
 
-    /* 双栏 */
     .row-2col {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -185,22 +313,12 @@
     }
 
     @media (max-width: 620px) {
-      .row-2col {
-        grid-template-columns: 1fr;
-        gap: 0;
-      }
-      .card-header {
-        padding: 1.5rem 1.5rem 1rem 1.5rem;
-      }
-      .card-body {
-        padding: 1.5rem;
-      }
-      .app-title h1 {
-        font-size: 1.7rem;
-      }
+      .row-2col { grid-template-columns: 1fr; gap: 0; }
+      .card-header { padding: 1.5rem; }
+      .card-body { padding: 1.5rem; }
+      .app-title h1 { font-size: 1.7rem; }
     }
 
-    /* 按钮组 */
     .action-buttons {
       display: flex;
       flex-wrap: wrap;
@@ -223,15 +341,11 @@
       gap: 8px;
       background: #ffffff;
       color: #334155;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
 
-    .btn:hover {
-      background: #f1f5f9;
-      border-color: #b8c2d0;
-    }
+    .btn:hover { background: #f1f5f9; border-color: #b8c2d0; }
 
     .btn-primary {
       background: #07c160;
@@ -240,21 +354,8 @@
       box-shadow: 0 6px 12px -6px rgba(7, 193, 96, 0.4);
     }
 
-    .btn-primary:hover {
-      background: #06ad56;
-      border-color: #06ad56;
-    }
+    .btn-primary:hover { background: #06ad56; border-color: #06ad56; }
 
-    .btn:active {
-      transform: translateY(1px);
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    /* 提交状态 */
     .toast-message {
       margin-top: 20px;
       padding: 14px 20px;
@@ -266,24 +367,6 @@
       animation: fadeIn 0.2s ease;
     }
 
-    .toast-success {
-      background: #e6f9ed;
-      color: #0b6e3b;
-      border-left: 6px solid #07c160;
-      border-top: 1px solid #b8e6cc;
-      border-right: 1px solid #b8e6cc;
-      border-bottom: 1px solid #b8e6cc;
-    }
-
-    .toast-error {
-      background: #fdeeee;
-      color: #a02020;
-      border-left: 6px solid #e03a3a;
-      border-top: 1px solid #f0c0c0;
-      border-right: 1px solid #f0c0c0;
-      border-bottom: 1px solid #f0c0c0;
-    }
-
     .toast-info {
       background: #eef4ff;
       color: #1a4d8c;
@@ -291,12 +374,6 @@
       border-top: 1px solid #b8d0f0;
       border-right: 1px solid #b8d0f0;
       border-bottom: 1px solid #b8d0f0;
-    }
-
-    .toast-message span {
-      font-size: 1.3rem;
-      line-height: 1.2;
-      flex-shrink: 0;
     }
 
     @keyframes fadeIn {
@@ -311,29 +388,15 @@
       text-align: center;
       border-top: 1px solid #d0d7e3;
       padding-top: 1.3rem;
-      letter-spacing: 0.3px;
       line-height: 1.8;
     }
 
-    .footnote a {
-      color: #07c160;
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    .footnote a:hover {
-      text-decoration: underline;
-    }
-
-    /* 强制无圆角 */
     input, textarea, select, button, .form-control, .btn,
-    .intro-text, .toast-message, .bug-report-card {
+    .intro-text, .toast-message, .bug-report-card, .issue-item {
       border-radius: 0 !important;
     }
 
-    ::placeholder {
-      opacity: 0.7;
-    }
+    ::placeholder { opacity: 0.7; }
   </style>
 </head>
 <body>
@@ -352,7 +415,28 @@
     <div class="card-body">
       <div class="intro-text">
         <strong>🐞 发现微信twu的Bug了？</strong> 感谢你帮助改进！<br>
-        填写下面的表单，点击提交后会跳转到 GitHub Issues 页面，你可以确认并发布。
+        提交前请先看看下面已有的 Bug 列表，避免重复报告哦～
+      </div>
+
+      <!-- ★ 已有 Bug 列表 ★ -->
+      <div class="issues-section">
+        <div class="issues-header">
+          <h2>
+            📋 已有 Bug 报告
+            <span class="count-badge" id="issueCount">—</span>
+          </h2>
+          <button class="refresh-btn" id="refreshBtn" onclick="loadIssues()">🔄 刷新</button>
+        </div>
+        <div id="issuesContainer">
+          <div class="issues-loading">⏳ 正在加载已有的 Bug 报告…</div>
+        </div>
+      </div>
+
+      <!-- 提交新 Bug 分隔线 -->
+      <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px dashed #d0d7e3;">
+        <h2 style="font-size: 1.1rem; color: #1a1a2e; font-weight: 700; margin-bottom: 1rem;">
+          ✏️ 提交新的 Bug 报告
+        </h2>
       </div>
 
       <form id="bugReportForm" onsubmit="return false;">
@@ -360,13 +444,13 @@
           <div>
             <div class="form-group">
               <label><span class="square-dot"></span>你的昵称 <span class="required">*</span></label>
-              <input type="text" class="form-control" id="nickname" placeholder="你的昵称">
+              <input type="text" class="form-control" id="nickname" placeholder="例如：小twu">
             </div>
           </div>
           <div>
             <div class="form-group">
               <label><span class="square-dot"></span>联系邮箱 (可选)</label>
-              <input type="email" class="form-control" id="email" placeholder="你的联系邮箱">
+              <input type="email" class="form-control" id="email" placeholder="方便回复你">
             </div>
           </div>
         </div>
@@ -409,8 +493,8 @@
         </div>
 
         <div class="action-buttons">
-          <button type="button" class="btn" id="clearBtn" onclick="clearForm()">清空</button>
-          <button type="submit" class="btn btn-primary" id="submitBtn" onclick="submitToGitHub()">提交到 GitHub Issues</button>
+          <button type="button" class="btn" onclick="clearForm()">清空</button>
+          <button type="submit" class="btn btn-primary" onclick="submitToGitHub()">提交到 GitHub Issues</button>
         </div>
       </form>
 
@@ -425,25 +509,111 @@
   <script>
     /* ============================================================
        ★★★  GitHub 仓库配置  ★★★
-       已为您配置好，无需再修改。
        ============================================================ */
     const GITHUB_CONFIG = {
-      owner: "Jiadan209",           // GitHub 用户名
-      repo: "wechat-twu-bugs",      // 仓库名
-      labels: ["bug", "微信twu"]     // Issue 标签
+      owner: "Jiadan209",
+      repo: "wechat-twu-bugs",
+      labels: ["bug", "微信twu"]
     };
 
     /* ============================================================
-       以下为业务逻辑，无需修改
+       已有 Bug 列表 — 从 GitHub API 拉取
        ============================================================ */
+    async function loadIssues() {
+      const container = document.getElementById('issuesContainer');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const countBadge = document.getElementById('issueCount');
 
-    // 检查配置是否有效
-    function isConfigValid() {
-      return GITHUB_CONFIG.owner.trim() !== "" &&
-             GITHUB_CONFIG.repo.trim() !== "";
+      // 禁用刷新按钮
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = '⏳ 加载中…';
+      container.innerHTML = '<div class="issues-loading">⏳ 正在加载已有的 Bug 报告…</div>';
+
+      try {
+        // 拉取所有 Issues（包括 Open 和 Closed），最多 30 条
+        const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues?state=all&per_page=30&sort=created&direction=desc`;
+        const res = await fetch(apiUrl, {
+          headers: { 'Accept': 'application/vnd.github+json' }
+        });
+
+        if (!res.ok) {
+          throw new Error(`GitHub API 返回 ${res.status}`);
+        }
+
+        const issues = await res.json();
+
+        // 过滤掉 Pull Requests（GitHub API 会把 PR 也算作 issue）
+        const bugIssues = issues.filter(item => !item.pull_request);
+
+        // 更新数量
+        countBadge.textContent = bugIssues.length;
+
+        // 无 Issue
+        if (bugIssues.length === 0) {
+          container.innerHTML = `
+            <div class="issues-empty">
+              ✨ 还没有人提交过 Bug，你可能是第一个发现问题的！
+            </div>
+          `;
+          return;
+        }
+
+        // 渲染列表
+        const listHtml = bugIssues.map(issue => {
+          const isOpen = issue.state === 'open';
+          const statusIcon = isOpen ? '🟢' : '⚪';
+          const statusText = isOpen ? '未解决' : '已关闭';
+          const createdDate = new Date(issue.created_at).toLocaleDateString('zh-CN');
+          const commentCount = issue.comments > 0 ? `💬 ${issue.comments}` : '';
+
+          return `
+            <a class="issue-item ${isOpen ? '' : 'closed'}" 
+               href="${issue.html_url}" 
+               target="_blank" 
+               rel="noopener noreferrer">
+              <span class="issue-status">${statusIcon}</span>
+              <div class="issue-info">
+                <div class="issue-title">${escapeHtml(issue.title)}</div>
+                <div class="issue-meta">
+                  <span class="issue-number">#${issue.number}</span>
+                  <span>${statusText}</span>
+                  <span>📅 ${createdDate}</span>
+                  <span>${commentCount}</span>
+                </div>
+              </div>
+            </a>
+          `;
+        }).join('');
+
+        container.innerHTML = `<ul class="issues-list">${listHtml}</ul>`;
+
+      } catch (err) {
+        console.error('加载 Issues 失败:', err);
+        container.innerHTML = `
+          <div class="issues-error">
+            ❌ 加载失败：${escapeHtml(err.message)}<br>
+            <span style="font-size:0.85rem;">可能是网络问题或 API 限制，请稍后重试，或直接访问 
+            <a href="https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues" 
+               target="_blank" style="color:#a02020;font-weight:700;">GitHub Issues 页面</a>。
+            </span>
+          </div>
+        `;
+        countBadge.textContent = '?';
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = '🔄 刷新';
+      }
     }
 
-    // 构建 Issue 内容（Markdown 格式）
+    /* ============================================================
+       以下是原有的业务逻辑
+       ============================================================ */
+
+    function isConfigValid() {
+      return GITHUB_CONFIG.owner.trim() !== '' &&
+             GITHUB_CONFIG.repo.trim() !== '';
+    }
+
     function buildIssueBody() {
       const nickname = document.getElementById('nickname').value.trim();
       const email = document.getElementById('email').value.trim() || '(未填写)';
@@ -453,30 +623,19 @@
       const steps = document.getElementById('steps').value.trim() || '(未填写)';
 
       return [
-        '### 🐞 Bug 描述',
-        '',
-        bugDesc,
-        '',
-        '### 📋 复现步骤',
-        '',
-        steps,
-        '',
-        '### 📊 问题信息',
-        '',
+        '### 🐞 Bug 描述', '', bugDesc, '',
+        '### 📋 复现步骤', '', steps, '',
+        '### 📊 问题信息', '',
         `- **问题类型**：${bugType}`,
-        `- **严重程度**：${severity}`,
-        '',
-        '### 👤 报告者信息',
-        '',
+        `- **严重程度**：${severity}`, '',
+        '### 👤 报告者信息', '',
         `- **昵称**：${nickname}`,
-        `- **联系邮箱**：${email}`,
-        '',
+        `- **联系邮箱**：${email}`, '',
         '---',
         `*由微信twu Bug汇报站提交 — ${new Date().toLocaleString('zh-CN')}*`
       ].join('\n');
     }
 
-    // 构建 GitHub Issue URL
     function buildIssueUrl() {
       const title = document.getElementById('bugTitle').value.trim();
       const body = buildIssueBody();
@@ -492,32 +651,15 @@
       return `${base}?${params.toString()}`;
     }
 
-    // 提交到 GitHub Issues
     function submitToGitHub() {
       const nickname = document.getElementById('nickname').value.trim();
       const bugTitle = document.getElementById('bugTitle').value.trim();
       const bugDesc = document.getElementById('bugDescription').value.trim();
 
-      if (!nickname) {
-        alert('请填写你的昵称（哪怕随便写一个）');
-        document.getElementById('nickname').focus();
-        return;
-      }
-      if (!bugTitle) {
-        alert('请填写 Bug 简要描述');
-        document.getElementById('bugTitle').focus();
-        return;
-      }
-      if (!bugDesc) {
-        alert('请填写详细描述，帮助作者定位问题');
-        document.getElementById('bugDescription').focus();
-        return;
-      }
-
-      if (!isConfigValid()) {
-        alert('⚠️ GitHub 仓库尚未配置！');
-        return;
-      }
+      if (!nickname) { alert('请填写你的昵称'); document.getElementById('nickname').focus(); return; }
+      if (!bugTitle) { alert('请填写 Bug 简要描述'); document.getElementById('bugTitle').focus(); return; }
+      if (!bugDesc) { alert('请填写详细描述'); document.getElementById('bugDescription').focus(); return; }
+      if (!isConfigValid()) { alert('⚠️ GitHub 仓库尚未配置！'); return; }
 
       const issueUrl = buildIssueUrl();
       const container = document.getElementById('messageContainer');
@@ -538,20 +680,33 @@
       window.open(issueUrl, '_blank', 'noopener,noreferrer');
     }
 
-    // 清空表单
     function clearForm() {
       document.getElementById('nickname').value = '';
       document.getElementById('email').value = '';
       document.getElementById('bugTitle').value = '';
       document.getElementById('bugDescription').value = '';
       document.getElementById('steps').value = '';
-
       document.getElementById('bugType').value = '界面显示';
       document.getElementById('severity').value = '一般';
-
       document.getElementById('messageContainer').innerHTML = '';
       document.getElementById('nickname').focus();
     }
+
+    // 防 XSS 转义
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return String(unsafe)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // 页面加载完成后自动拉取 Issues
+    window.addEventListener('DOMContentLoaded', function() {
+      loadIssues();
+    });
   </script>
 </body>
 </html>
