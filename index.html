@@ -31,7 +31,6 @@
       overflow: hidden;
     }
 
-    /* 头部 */
     .card-header {
       background: #1a1a2e;
       padding: 1.8rem 2.2rem 1.4rem 2.2rem;
@@ -102,6 +101,35 @@
       font-weight: 700;
     }
 
+    /* 草稿提示 */
+    .draft-notice {
+      background: #eef4ff;
+      border-left: 6px solid #2563eb;
+      padding: 10px 16px;
+      margin-bottom: 1.2rem;
+      font-size: 0.88rem;
+      color: #1a4d8c;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .draft-notice.active { display: flex; }
+
+    .draft-notice button {
+      background: transparent;
+      border: 1px solid #2563eb;
+      color: #2563eb;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .draft-notice button:hover { background: #2563eb; color: white; }
+
     /* ============ 统计面板 ============ */
     .stats-panel {
       display: grid;
@@ -140,10 +168,8 @@
       .stats-panel { grid-template-columns: 1fr 1fr; }
     }
 
-    /* ============ 已有 Bug 列表 ============ */
-    .issues-section {
-      margin-top: 0.5rem;
-    }
+    /* ============ 列表 ============ */
+    .issues-section { margin-top: 0.5rem; }
 
     .issues-header {
       display: flex;
@@ -185,7 +211,6 @@
     .refresh-btn:hover { background: #f1f5f9; }
     .refresh-btn:disabled { opacity: 0.5; cursor: wait; }
 
-    /* 搜索/筛选 */
     .filter-bar {
       display: flex;
       gap: 8px;
@@ -230,6 +255,7 @@
       transition: all 0.15s;
       text-decoration: none;
       color: inherit;
+      cursor: pointer;
     }
 
     .issue-item:hover {
@@ -296,7 +322,7 @@
       border-color: #b8e6cc;
     }
 
-    /* ============ 表单样式 ============ */
+    /* ============ 表单 ============ */
     .form-group { margin-bottom: 1.8rem; }
 
     .form-group label {
@@ -341,6 +367,11 @@
       box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.15);
     }
 
+    .form-control.invalid {
+      border-color: #e03a3a;
+      background: #fff8f8;
+    }
+
     .form-control::placeholder { color: #9aa6b8; font-weight: 300; }
 
     textarea.form-control { min-height: 140px; }
@@ -354,7 +385,16 @@
       cursor: pointer;
     }
 
-    /* 重复检测提示 */
+    .char-counter {
+      text-align: right;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .char-counter.warn { color: #f5a623; }
+    .char-counter.over { color: #e03a3a; font-weight: 700; }
+
     .duplicate-hint {
       margin-top: 8px;
       padding: 10px 14px;
@@ -425,6 +465,11 @@
 
     .btn-primary:hover { background: #06ad56; border-color: #06ad56; }
 
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .toast-message {
       margin-top: 20px;
       padding: 14px 20px;
@@ -445,10 +490,133 @@
       border-bottom: 1px solid #b8d0f0;
     }
 
+    .toast-error {
+      background: #fdeeee;
+      color: #a02020;
+      border-left: 6px solid #e03a3a;
+      border-top: 1px solid #f0c0c0;
+      border-right: 1px solid #f0c0c0;
+      border-bottom: 1px solid #f0c0c0;
+    }
+
+    .toast-success {
+      background: #e6f9ed;
+      color: #0b6e3b;
+      border-left: 6px solid #07c160;
+      border-top: 1px solid #b8e6cc;
+      border-right: 1px solid #b8e6cc;
+      border-bottom: 1px solid #b8e6cc;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    /* ============ 弹窗 ============ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-content {
+      background: #ffffff;
+      max-width: 680px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4);
+      border: 1px solid #d0d7e3;
+    }
+
+    .modal-header {
+      background: #1a1a2e;
+      color: white;
+      padding: 1.2rem 1.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 4px solid #07c160;
+    }
+
+    .modal-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: 1px solid #4a4a6a;
+      color: #d0d4f0;
+      width: 32px;
+      height: 32px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .modal-close:hover { background: #e03a3a; border-color: #e03a3a; color: white; }
+
+    .modal-body {
+      padding: 1.6rem;
+    }
+
+    .modal-meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.85rem;
+      color: #7c8b9c;
+    }
+
+    .modal-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .modal-body-content {
+      font-size: 0.95rem;
+      color: #2c3e50;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 40vh;
+      overflow-y: auto;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 14px 18px;
+    }
+
+    .modal-footer {
+      padding: 1.2rem 1.6rem;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .modal-footer .btn { padding: 10px 22px; font-size: 0.9rem; }
 
     .footnote {
       margin-top: 2rem;
@@ -461,7 +629,8 @@
     }
 
     input, textarea, select, button, .form-control, .btn,
-    .intro-text, .toast-message, .bug-report-card, .issue-item, .stat-card {
+    .intro-text, .toast-message, .bug-report-card, .issue-item, .stat-card,
+    .modal-content, .modal-close, .draft-notice {
       border-radius: 0 !important;
     }
 
@@ -487,6 +656,15 @@
         填写下面的表单提交新的 Bug，或者往下翻看看别人已经报告过的问题～
       </div>
 
+      <!-- 草稿恢复提示 -->
+      <div class="draft-notice" id="draftNotice">
+        <span>📝 检测到您上次填写的草稿，是否恢复？</span>
+        <div style="display:flex;gap:8px;">
+          <button onclick="restoreDraft()">恢复</button>
+          <button onclick="discardDraft()">丢弃</button>
+        </div>
+      </div>
+
       <!-- ============ ① 提交新 Bug ============ -->
       <h2 style="font-size: 1.1rem; color: #1a1a2e; font-weight: 700; margin-bottom: 1rem;">
         ✏️ 提交新的 Bug 报告
@@ -497,13 +675,13 @@
           <div>
             <div class="form-group">
               <label><span class="square-dot"></span>你的昵称 <span class="required">*</span></label>
-              <input type="text" class="form-control" id="nickname" placeholder="例如：小twu">
+              <input type="text" class="form-control" id="nickname" placeholder="例如：小twu" maxlength="30">
             </div>
           </div>
           <div>
             <div class="form-group">
               <label><span class="square-dot"></span>联系邮箱 (可选)</label>
-              <input type="email" class="form-control" id="email" placeholder="方便回复你">
+              <input type="email" class="form-control" id="email" placeholder="方便回复你" maxlength="80">
             </div>
           </div>
         </div>
@@ -512,7 +690,9 @@
           <label><span class="square-dot"></span>Bug 简要描述 <span class="required">*</span></label>
           <input type="text" class="form-control" id="bugTitle" 
                  placeholder="例如：发送消息后闪退 / 头像不显示"
-                 oninput="checkDuplicate()">
+                 maxlength="80"
+                 oninput="onTitleInput()">
+          <div class="char-counter" id="titleCounter">0 / 80</div>
           <div class="duplicate-hint" id="duplicateHint"></div>
         </div>
 
@@ -540,26 +720,33 @@
 
         <div class="form-group">
           <label><span class="square-dot"></span>详细描述 <span class="required">*</span></label>
-          <textarea class="form-control" id="bugDescription" placeholder="请描述：什么时候发生的？你点击了什么？期望结果是什么？"></textarea>
+          <textarea class="form-control" id="bugDescription" 
+                    placeholder="请描述：什么时候发生的？你点击了什么？期望结果是什么？"
+                    maxlength="1000"
+                    oninput="onDescInput()"></textarea>
+          <div class="char-counter" id="descCounter">0 / 1000</div>
         </div>
 
         <div class="form-group">
           <label><span class="square-dot"></span>复现步骤 (建议填写)</label>
-          <textarea class="form-control" id="steps" placeholder="1. 打开微信twu聊天界面&#10;2. 点击输入框输入文字&#10;3. 快速点击发送三次" style="min-height: 100px;"></textarea>
+          <textarea class="form-control" id="steps" 
+                    placeholder="1. 打开微信twu聊天界面&#10;2. 点击输入框输入文字&#10;3. 快速点击发送三次"
+                    maxlength="600"
+                    style="min-height: 100px;"></textarea>
+          <div class="char-counter" id="stepsCounter">0 / 600</div>
         </div>
 
         <div class="action-buttons">
           <button type="button" class="btn" onclick="clearForm()">清空</button>
-          <button type="submit" class="btn btn-primary" onclick="submitToGitHub()">提交到 GitHub Issues</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn" onclick="submitToGitHub()">提交到 GitHub Issues</button>
         </div>
       </form>
 
       <div id="messageContainer"></div>
 
-      <!-- ============ ② 已有 Bug 列表 ============ -->
+      <!-- ============ ② 已有 Bug ============ -->
       <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px dashed #d0d7e3;">
 
-        <!-- 统计面板 -->
         <div class="stats-panel" id="statsPanel">
           <div class="stat-card">
             <div class="stat-value" id="statTotal">—</div>
@@ -579,7 +766,6 @@
           </div>
         </div>
 
-        <!-- 列表 -->
         <div class="issues-section">
           <div class="issues-header">
             <h2>
@@ -611,6 +797,24 @@
     </div>
   </div>
 
+  <!-- ============ 详情弹窗 ============ -->
+  <div class="modal-overlay" id="issueModal" onclick="closeModalOnOverlay(event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">加载中…</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-meta" id="modalMeta"></div>
+        <div class="modal-body-content" id="modalBody"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal()">关闭</button>
+        <a class="btn btn-primary" id="modalGithubLink" href="#" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">去 GitHub 查看完整讨论 →</a>
+      </div>
+    </div>
+  </div>
+
   <script>
     /* ============================================================
        ★★★  GitHub 仓库配置  ★★★
@@ -621,11 +825,94 @@
       labels: ["bug", "微信twu"]
     };
 
+    /* 常量 */
+    const DRAFT_KEY = 'wechat_twu_bug_draft';
+    const SUBMIT_LIMIT_KEY = 'wechat_twu_last_submit';
+    const SUBMIT_COOLDOWN_MS = 3 * 60 * 1000;  // 3 分钟
+
     /* 全局缓存 */
     let allIssues = [];
 
     /* ============================================================
-       加载并渲染 Issues
+       草稿功能
+       ============================================================ */
+    function getFormData() {
+      return {
+        nickname: document.getElementById('nickname').value,
+        email: document.getElementById('email').value,
+        bugTitle: document.getElementById('bugTitle').value,
+        bugType: document.getElementById('bugType').value,
+        severity: document.getElementById('severity').value,
+        bugDescription: document.getElementById('bugDescription').value,
+        steps: document.getElementById('steps').value
+      };
+    }
+
+    function hasDraftContent(data) {
+      return data && (
+        data.nickname || data.email || data.bugTitle ||
+        data.bugDescription || data.steps
+      );
+    }
+
+    function saveDraft() {
+      const data = getFormData();
+      if (hasDraftContent(data)) {
+        try {
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+        } catch (e) { /* 忽略存储错误 */ }
+      }
+    }
+
+    function loadDraftFromStorage() {
+      try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function restoreDraft() {
+      const data = loadDraftFromStorage();
+      if (!data) return;
+
+      document.getElementById('nickname').value = data.nickname || '';
+      document.getElementById('email').value = data.email || '';
+      document.getElementById('bugTitle').value = data.bugTitle || '';
+      document.getElementById('bugType').value = data.bugType || '界面显示';
+      document.getElementById('severity').value = data.severity || '一般';
+      document.getElementById('bugDescription').value = data.bugDescription || '';
+      document.getElementById('steps').value = data.steps || '';
+
+      updateAllCounters();
+      checkDuplicate();
+      document.getElementById('draftNotice').classList.remove('active');
+    }
+
+    function discardDraft() {
+      localStorage.removeItem(DRAFT_KEY);
+      document.getElementById('draftNotice').classList.remove('active');
+    }
+
+    /* ============================================================
+       字数统计
+       ============================================================ */
+    function updateCounter(inputId, counterId, max) {
+      const val = document.getElementById(inputId).value;
+      const counter = document.getElementById(counterId);
+      counter.textContent = `${val.length} / ${max}`;
+      counter.classList.remove('warn', 'over');
+      if (val.length >= max) counter.classList.add('over');
+      else if (val.length >= max * 0.9) counter.classList.add('warn');
+    }
+
+    function updateAllCounters() {
+      updateCounter('bugTitle', 'titleCounter', 80);
+      updateCounter('bugDescription', 'descCounter', 1000);
+      updateCounter('steps', 'stepsCounter', 600);
+    }
+
+    /* ============================================================
+       加载 Issues
        ============================================================ */
     async function loadIssues() {
       const container = document.getElementById('issuesContainer');
@@ -669,7 +956,7 @@
     }
 
     /* ============================================================
-       更新统计面板
+       统计面板
        ============================================================ */
     function updateStats(issues) {
       const total = issues.length;
@@ -686,7 +973,7 @@
     }
 
     /* ============================================================
-       渲染 Issues（含搜索/筛选）
+       渲染列表
        ============================================================ */
     function renderIssues() {
       const container = document.getElementById('issuesContainer');
@@ -724,10 +1011,7 @@
         const commentCount = issue.comments > 0 ? `💬 ${issue.comments}` : '';
 
         return `
-          <a class="issue-item ${isOpen ? '' : 'closed'}" 
-             href="${issue.html_url}" 
-             target="_blank" 
-             rel="noopener noreferrer">
+          <div class="issue-item ${isOpen ? '' : 'closed'}" onclick="openIssueModal(${issue.number})">
             <span class="issue-status">${statusIcon}</span>
             <div class="issue-info">
               <div class="issue-title">${escapeHtml(issue.title)}</div>
@@ -738,7 +1022,7 @@
                 <span>${commentCount}</span>
               </div>
             </div>
-          </a>
+          </div>
         `;
       }).join('');
 
@@ -746,8 +1030,96 @@
     }
 
     /* ============================================================
-       重复 Bug 检测
+       详情弹窗
        ============================================================ */
+    async function openIssueModal(issueNumber) {
+      const modal = document.getElementById('issueModal');
+      const titleEl = document.getElementById('modalTitle');
+      const metaEl = document.getElementById('modalMeta');
+      const bodyEl = document.getElementById('modalBody');
+      const ghLink = document.getElementById('modalGithubLink');
+
+      // 先用缓存的数据快速展示
+      const cached = allIssues.find(i => i.number === issueNumber);
+      if (cached) {
+        renderModalContent(cached);
+        ghLink.href = cached.html_url;
+      } else {
+        titleEl.textContent = '加载中…';
+        metaEl.innerHTML = '';
+        bodyEl.textContent = '';
+      }
+
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      // 从 API 拉取完整详情（含 body）
+      try {
+        const res = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues/${issueNumber}`, {
+          headers: { 'Accept': 'application/vnd.github+json' }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          renderModalContent(data);
+          ghLink.href = data.html_url;
+        }
+      } catch (e) {
+        // 失败则用缓存
+        if (!cached) bodyEl.textContent = '加载失败，请点击下方按钮前往 GitHub 查看。';
+      }
+    }
+
+    function renderModalContent(issue) {
+      const titleEl = document.getElementById('modalTitle');
+      const metaEl = document.getElementById('modalMeta');
+      const bodyEl = document.getElementById('modalBody');
+
+      titleEl.textContent = issue.title;
+
+      const isOpen = issue.state === 'open';
+      const statusText = isOpen ? '🟢 未解决' : '⚪ 已关闭';
+      const createdDate = new Date(issue.created_at).toLocaleString('zh-CN');
+
+      metaEl.innerHTML = `
+        <span>#${issue.number}</span>
+        <span>${statusText}</span>
+        <span>📅 ${createdDate}</span>
+        <span>💬 ${issue.comments} 条评论</span>
+      `;
+
+      bodyEl.textContent = issue.body || '(无描述)';
+    }
+
+    function closeModal() {
+      document.getElementById('issueModal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function closeModalOnOverlay(e) {
+      if (e.target.id === 'issueModal') closeModal();
+    }
+
+    // ESC 关闭弹窗
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    /* ============================================================
+       重复检测
+       ============================================================ */
+    function onTitleInput() {
+      updateCounter('bugTitle', 'titleCounter', 80);
+      checkDuplicate();
+      saveDraft();
+    }
+
+    function onDescInput() {
+      updateCounter('bugDescription', 'descCounter', 1000);
+      saveDraft();
+    }
+
     function checkDuplicate() {
       const hint = document.getElementById('duplicateHint');
       const input = document.getElementById('bugTitle').value.trim().toLowerCase();
@@ -768,7 +1140,7 @@
 
       if (matched.length > 0) {
         const links = matched.map(i => 
-          `<a href="${i.html_url}" target="_blank" rel="noopener noreferrer">#${i.number} ${escapeHtml(i.title)}</a>`
+          `<a onclick="openIssueModal(${i.number});return false;" href="#">#${i.number} ${escapeHtml(i.title)}</a>`
         ).join('<br>');
 
         hint.innerHTML = `⚠️ <strong>发现相似的已有报告：</strong><br>${links}<br>
@@ -778,7 +1150,7 @@
     }
 
     /* ============================================================
-       原有业务逻辑
+       表单业务
        ============================================================ */
     function isConfigValid() {
       return GITHUB_CONFIG.owner.trim() !== '' && GITHUB_CONFIG.repo.trim() !== '';
@@ -821,18 +1193,96 @@
       return `${base}?${params.toString()}`;
     }
 
+    function checkRateLimit() {
+      try {
+        const last = localStorage.getItem(SUBMIT_LIMIT_KEY);
+        if (!last) return { ok: true };
+        const elapsed = Date.now() - parseInt(last, 10);
+        if (elapsed < SUBMIT_COOLDOWN_MS) {
+          const remain = Math.ceil((SUBMIT_COOLDOWN_MS - elapsed) / 1000);
+          return { ok: false, remain };
+        }
+        return { ok: true };
+      } catch (e) { return { ok: true }; }
+    }
+
     function submitToGitHub() {
       const nickname = document.getElementById('nickname').value.trim();
+      const email = document.getElementById('email').value.trim();
       const bugTitle = document.getElementById('bugTitle').value.trim();
       const bugDesc = document.getElementById('bugDescription').value.trim();
 
-      if (!nickname) { alert('请填写你的昵称'); document.getElementById('nickname').focus(); return; }
-      if (!bugTitle) { alert('请填写 Bug 简要描述'); document.getElementById('bugTitle').focus(); return; }
-      if (!bugDesc) { alert('请填写详细描述'); document.getElementById('bugDescription').focus(); return; }
-      if (!isConfigValid()) { alert('⚠️ GitHub 仓库尚未配置！'); return; }
+      const container = document.getElementById('messageContainer');
+
+      // 校验昵称
+      if (!nickname) {
+        alert('请填写你的昵称');
+        document.getElementById('nickname').focus();
+        return;
+      }
+
+      // 校验邮箱格式（如果填了）
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert('邮箱格式不正确');
+        document.getElementById('email').focus();
+        return;
+      }
+
+      // 校验标题
+      if (!bugTitle) {
+        alert('请填写 Bug 简要描述');
+        document.getElementById('bugTitle').focus();
+        return;
+      }
+      if (bugTitle.length < 4) {
+        alert('Bug 描述太短了，请至少写 4 个字，方便作者定位问题');
+        document.getElementById('bugTitle').focus();
+        return;
+      }
+
+      // 校验描述
+      if (!bugDesc) {
+        alert('请填写详细描述');
+        document.getElementById('bugDescription').focus();
+        return;
+      }
+      if (bugDesc.length < 10) {
+        alert('详细描述太短了，请至少写 10 个字');
+        document.getElementById('bugDescription').focus();
+        return;
+      }
+
+      // 频率限制
+      const rl = checkRateLimit();
+      if (!rl.ok) {
+        container.innerHTML = `
+          <div class="toast-message toast-error">
+            <span>⏳</span>
+            <div>
+              <strong>提交太频繁啦～</strong><br>
+              请等待 <strong>${rl.remain} 秒</strong>后再试，避免重复提交相同内容。
+            </div>
+          </div>
+        `;
+        container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+
+      if (!isConfigValid()) {
+        alert('⚠️ GitHub 仓库尚未配置！');
+        return;
+      }
 
       const issueUrl = buildIssueUrl();
-      const container = document.getElementById('messageContainer');
+
+      // 记录提交时间
+      try { localStorage.setItem(SUBMIT_LIMIT_KEY, String(Date.now())); } catch (e) {}
+
+      // 按钮加载状态
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ 正在跳转…';
 
       container.innerHTML = `
         <div class="toast-message toast-info">
@@ -847,7 +1297,21 @@
       `;
 
       container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      // 新标签页打开
       window.open(issueUrl, '_blank', 'noopener,noreferrer');
+
+      // 3 秒后恢复按钮，同时清除草稿 + 刷新列表
+      setTimeout(function() {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+
+        // 清除草稿
+        try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+
+        // 刷新列表（用户可能已在 GitHub 提交完）
+        loadIssues();
+      }, 3000);
     }
 
     function clearForm() {
@@ -861,6 +1325,10 @@
       document.getElementById('messageContainer').innerHTML = '';
       document.getElementById('duplicateHint').classList.remove('active');
       document.getElementById('duplicateHint').innerHTML = '';
+
+      updateAllCounters();
+      try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+      document.getElementById('draftNotice').classList.remove('active');
       document.getElementById('nickname').focus();
     }
 
@@ -874,7 +1342,32 @@
         .replace(/'/g, '&#039;');
     }
 
-    window.addEventListener('DOMContentLoaded', loadIssues);
+    /* ============================================================
+       页面加载
+       ============================================================ */
+    window.addEventListener('DOMContentLoaded', function() {
+      // 绑定输入事件（自动保存草稿）
+      const inputs = ['nickname', 'email', 'bugTitle', 'bugType', 'severity', 'bugDescription', 'steps'];
+      inputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', saveDraft);
+          el.addEventListener('change', saveDraft);
+        }
+      });
+
+      // 初始化字数统计
+      updateAllCounters();
+
+      // 检查草稿
+      const draft = loadDraftFromStorage();
+      if (hasDraftContent(draft)) {
+        document.getElementById('draftNotice').classList.add('active');
+      }
+
+      // 加载 Issues
+      loadIssues();
+    });
   </script>
 </body>
 </html>
