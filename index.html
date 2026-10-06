@@ -501,7 +501,7 @@
         </div>
         <div class="stat-card closed">
           <div class="stat-value" id="statClosed">—</div>
-          <div class="stat-label">已关闭</div>
+          <div class="stat-label">已解决</div>
         </div>
         <div class="stat-card week">
           <div class="stat-value" id="statWeek">—</div>
@@ -521,11 +521,11 @@
 
         <!-- 搜索/筛选 -->
         <div class="filter-bar">
-          <input type="text" id="searchInput" placeholder="🔍 搜索关键词，例如：气泡、闪退" oninput="renderIssues()">
+          <input type="text" id="searchInput" placeholder="🔍 搜索关键词" oninput="renderIssues()">
           <select id="stateFilter" onchange="renderIssues()">
             <option value="all">全部状态</option>
             <option value="open">未解决</option>
-            <option value="closed">已关闭</option>
+            <option value="closed">已解决</option>
           </select>
         </div>
 
