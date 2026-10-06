@@ -143,8 +143,6 @@
     /* ============ 已有 Bug 列表 ============ */
     .issues-section {
       margin-top: 0.5rem;
-      border-top: 1px dashed #d0d7e3;
-      padding-top: 1.6rem;
     }
 
     .issues-header {
@@ -486,74 +484,26 @@
     <div class="card-body">
       <div class="intro-text">
         <strong>🐞 发现微信twu的Bug了？</strong> 感谢你帮助改进！<br>
-        提交前请先搜索下方的列表，避免重复报告哦～
-        如果你可以优化shit代码山可以加入我们
+        填写下面的表单提交新的 Bug，或者往下翻看看别人已经报告过的问题～
       </div>
 
-      <!-- ★ 统计面板 ★ -->
-      <div class="stats-panel" id="statsPanel">
-        <div class="stat-card">
-          <div class="stat-value" id="statTotal">—</div>
-          <div class="stat-label">总 Bug 数</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="statOpen">—</div>
-          <div class="stat-label">未解决</div>
-        </div>
-        <div class="stat-card closed">
-          <div class="stat-value" id="statClosed">—</div>
-          <div class="stat-label">已解决</div>
-        </div>
-        <div class="stat-card week">
-          <div class="stat-value" id="statWeek">—</div>
-          <div class="stat-label">最近7天</div>
-        </div>
-      </div>
-
-      <!-- ★ 已有 Bug 列表 ★ -->
-      <div class="issues-section">
-        <div class="issues-header">
-          <h2>
-            📋 已有 Bug 报告
-            <span class="count-badge" id="issueCount">—</span>
-          </h2>
-          <button class="refresh-btn" id="refreshBtn" onclick="loadIssues()">🔄 刷新</button>
-        </div>
-
-        <!-- 搜索/筛选 -->
-        <div class="filter-bar">
-          <input type="text" id="searchInput" placeholder="🔍 搜索关键词" oninput="renderIssues()">
-          <select id="stateFilter" onchange="renderIssues()">
-            <option value="all">全部状态</option>
-            <option value="open">未解决</option>
-            <option value="closed">已解决</option>
-          </select>
-        </div>
-
-        <div id="issuesContainer">
-          <div class="issues-loading">⏳ 正在加载已有的 Bug 报告…</div>
-        </div>
-      </div>
-
-      <!-- 提交新 Bug 分隔线 -->
-      <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px dashed #d0d7e3;">
-        <h2 style="font-size: 1.1rem; color: #1a1a2e; font-weight: 700; margin-bottom: 1rem;">
-          ✏️ 提交新的 Bug 报告
-        </h2>
-      </div>
+      <!-- ============ ① 提交新 Bug ============ -->
+      <h2 style="font-size: 1.1rem; color: #1a1a2e; font-weight: 700; margin-bottom: 1rem;">
+        ✏️ 提交新的 Bug 报告
+      </h2>
 
       <form id="bugReportForm" onsubmit="return false;">
         <div class="row-2col">
           <div>
             <div class="form-group">
               <label><span class="square-dot"></span>你的昵称 <span class="required">*</span></label>
-              <input type="text" class="form-control" id="nickname" placeholder="你的昵称">
+              <input type="text" class="form-control" id="nickname" placeholder="例如：小twu">
             </div>
           </div>
           <div>
             <div class="form-group">
               <label><span class="square-dot"></span>联系邮箱 (可选)</label>
-              <input type="email" class="form-control" id="email" placeholder="你的联系邮箱">
+              <input type="email" class="form-control" id="email" placeholder="方便回复你">
             </div>
           </div>
         </div>
@@ -563,7 +513,6 @@
           <input type="text" class="form-control" id="bugTitle" 
                  placeholder="例如：发送消息后闪退 / 头像不显示"
                  oninput="checkDuplicate()">
-          <!-- 重复检测提示 -->
           <div class="duplicate-hint" id="duplicateHint"></div>
         </div>
 
@@ -607,6 +556,55 @@
 
       <div id="messageContainer"></div>
 
+      <!-- ============ ② 已有 Bug 列表 ============ -->
+      <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px dashed #d0d7e3;">
+
+        <!-- 统计面板 -->
+        <div class="stats-panel" id="statsPanel">
+          <div class="stat-card">
+            <div class="stat-value" id="statTotal">—</div>
+            <div class="stat-label">总 Bug 数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statOpen">—</div>
+            <div class="stat-label">未解决</div>
+          </div>
+          <div class="stat-card closed">
+            <div class="stat-value" id="statClosed">—</div>
+            <div class="stat-label">已关闭</div>
+          </div>
+          <div class="stat-card week">
+            <div class="stat-value" id="statWeek">—</div>
+            <div class="stat-label">最近7天</div>
+          </div>
+        </div>
+
+        <!-- 列表 -->
+        <div class="issues-section">
+          <div class="issues-header">
+            <h2>
+              📋 已有 Bug 报告
+              <span class="count-badge" id="issueCount">—</span>
+            </h2>
+            <button class="refresh-btn" id="refreshBtn" onclick="loadIssues()">🔄 刷新</button>
+          </div>
+
+          <div class="filter-bar">
+            <input type="text" id="searchInput" placeholder="🔍 搜索关键词，例如：气泡、闪退" oninput="renderIssues()">
+            <select id="stateFilter" onchange="renderIssues()">
+              <option value="all">全部状态</option>
+              <option value="open">未解决</option>
+              <option value="closed">已关闭</option>
+            </select>
+          </div>
+
+          <div id="issuesContainer">
+            <div class="issues-loading">⏳ 正在加载已有的 Bug 报告…</div>
+          </div>
+        </div>
+
+      </div>
+
       <div class="footnote">
         ⚡ 微信twu · 由 TurboWarp 驱动 · 提交后将打开 GitHub Issues 页面
       </div>
@@ -623,7 +621,7 @@
       labels: ["bug", "微信twu"]
     };
 
-    /* 全局缓存 — 保存拉取到的 Issues 列表 */
+    /* 全局缓存 */
     let allIssues = [];
 
     /* ============================================================
@@ -646,13 +644,9 @@
         if (!res.ok) throw new Error(`GitHub API 返回 ${res.status}`);
 
         const data = await res.json();
-        // 过滤掉 Pull Requests
         allIssues = data.filter(item => !item.pull_request);
 
-        // 更新统计数据
         updateStats(allIssues);
-
-        // 渲染列表
         renderIssues();
 
       } catch (err) {
@@ -682,7 +676,6 @@
       const open = issues.filter(i => i.state === 'open').length;
       const closed = total - open;
 
-      // 最近7天
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const week = issues.filter(i => new Date(i.created_at) >= sevenDaysAgo).length;
 
@@ -701,7 +694,6 @@
       const keyword = (document.getElementById('searchInput').value || '').trim().toLowerCase();
       const stateFilter = document.getElementById('stateFilter').value;
 
-      // 筛选
       let filtered = allIssues;
       if (stateFilter !== 'all') {
         filtered = filtered.filter(i => i.state === stateFilter);
@@ -715,7 +707,6 @@
 
       countBadge.textContent = filtered.length;
 
-      // 空状态
       if (filtered.length === 0) {
         if (allIssues.length === 0) {
           container.innerHTML = `<div class="issues-empty">✨ 还没有人提交过 Bug，你可能是第一个发现问题的！</div>`;
@@ -725,7 +716,6 @@
         return;
       }
 
-      // 渲染列表
       const listHtml = filtered.map(issue => {
         const isOpen = issue.state === 'open';
         const statusIcon = isOpen ? '🟢' : '⚪';
@@ -762,24 +752,19 @@
       const hint = document.getElementById('duplicateHint');
       const input = document.getElementById('bugTitle').value.trim().toLowerCase();
 
-      // 清空提示
       hint.classList.remove('active');
       hint.innerHTML = '';
 
-      // 输入太短不检测
       if (input.length < 2) return;
-      // 还没加载好 Issues 不检测
       if (allIssues.length === 0) return;
 
-      // 简单关键词匹配：把输入拆成词，看是否在 Issue 标题里出现
       const keywords = input.split(/[\s，,。.、\/\\|]+/).filter(w => w.length >= 2);
       if (keywords.length === 0) return;
 
       const matched = allIssues.filter(issue => {
         const title = issue.title.toLowerCase();
-        // 至少有 1 个关键词命中就算相似
         return keywords.some(kw => title.includes(kw));
-      }).slice(0, 3); // 最多显示 3 条
+      }).slice(0, 3);
 
       if (matched.length > 0) {
         const links = matched.map(i => 
@@ -793,7 +778,7 @@
     }
 
     /* ============================================================
-       以下是原有的业务逻辑
+       原有业务逻辑
        ============================================================ */
     function isConfigValid() {
       return GITHUB_CONFIG.owner.trim() !== '' && GITHUB_CONFIG.repo.trim() !== '';
@@ -889,7 +874,6 @@
         .replace(/'/g, '&#039;');
     }
 
-    // 页面加载完成后自动拉取
     window.addEventListener('DOMContentLoaded', loadIssues);
   </script>
 </body>
