@@ -19,21 +19,21 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 1.5rem;
+      padding: 0;
     }
 
     .bug-report-card {
-      max-width: 1280px;
+      max-width: 100%;
       width: 100%;
+      min-height: 100vh;
       background: #ffffff;
-      box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.2);
-      border: 1px solid #d0d7e3;
+      border: none;
       overflow: hidden;
     }
 
     .card-header {
       background: #1a1a2e;
-      padding: 1.8rem 2.2rem 1.4rem 2.2rem;
+      padding: 1.8rem 4rem 1.4rem 4rem;
       color: white;
       border-bottom: 4px solid #07c160;
     }
@@ -80,14 +80,19 @@
 
     /* ============ 双栏主布局 ============ */
     .card-body {
-      padding: 2rem 2.2rem 2.2rem 2.2rem;
+      padding: 2.5rem 4rem 3rem 4rem;
       background: #ffffff;
+    }
+
+    @media (max-width: 1200px) {
+      .card-header { padding: 1.8rem 2.2rem 1.4rem 2.2rem; }
+      .card-body { padding: 2rem 2.2rem 2.2rem 2.2rem; }
     }
 
     .main-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 2rem;
+      gap: 3rem;
       align-items: start;
     }
 
@@ -98,23 +103,19 @@
       }
     }
 
-    /* 左栏：表单 */
     .left-column { min-width: 0; }
-
-    /* 右栏：统计 + 列表 */
     .right-column { min-width: 0; }
 
-    /* 右栏粘性定位，让列表在滚动时跟着（可选） */
+    /* 右栏粘性定位（桌面端） */
     @media (min-width: 961px) {
       .right-column {
         position: sticky;
-        top: 1.5rem;
-        max-height: calc(100vh - 3rem);
+        top: 0;
+        max-height: 100vh;
         overflow-y: auto;
-        padding-right: 4px;
+        padding-right: 6px;
       }
 
-      /* 滚动条美化 */
       .right-column::-webkit-scrollbar { width: 6px; }
       .right-column::-webkit-scrollbar-track { background: #f1f5f9; }
       .right-column::-webkit-scrollbar-thumb { background: #cbd5e1; }
@@ -177,7 +178,7 @@
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-left: 3px solid #07c160;
-      padding: 10px 8px;
+      padding: 12px 8px;
       text-align: center;
     }
 
@@ -186,14 +187,14 @@
     .stat-card.week { border-left-color: #2563eb; }
 
     .stat-value {
-      font-size: 1.3rem;
+      font-size: 1.5rem;
       font-weight: 700;
       color: #1a1a2e;
       line-height: 1.2;
     }
 
     .stat-label {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       color: #7c8b9c;
       margin-top: 3px;
       font-weight: 500;
@@ -654,7 +655,7 @@
     .modal-footer .btn { padding: 10px 22px; font-size: 0.9rem; }
 
     .footnote {
-      margin-top: 2rem;
+      margin-top: 2.5rem;
       font-size: 0.8rem;
       color: #7c8b9c;
       text-align: center;
@@ -700,7 +701,7 @@
 
         <!-- ===== 左栏：提交表单 ===== -->
         <div class="left-column">
-          <h2 style="font-size: 1.1rem; color: #1a1a2e; font-weight: 700; margin-bottom: 1rem;">
+          <h2 style="font-size: 1.15rem; color: #1a1a2e; font-weight: 700; margin-bottom: 1rem;">
             ✏️ 提交新的 Bug 报告
           </h2>
 
