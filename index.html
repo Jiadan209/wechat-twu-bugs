@@ -5,12 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>微信twu · Bug汇报站</title>
   <style>
+    :root {
+      --bg-body: #f5f7fa;
+      --bg-card: #ffffff;
+      --bg-soft: #f8fafc;
+      --bg-input: #ffffff;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --border-focus: #07c160;
+      --green: #07c160;
+      --green-dark: #059a4c;
+      --green-soft: #e8f9ef;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --blue-soft: #eff6ff;
+      --orange: #f59e0b;
+      --orange-soft: #fffbeb;
+      --gray: #94a3b8;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      border-radius: 0 !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     }
 
     html, body {
@@ -19,30 +42,53 @@
     }
 
     body {
-      background: #eef1f6;
+      background: var(--bg-body);
       display: flex;
       justify-content: center;
       align-items: stretch;
       padding: 0;
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
     }
 
     .bug-report-card {
       width: 100%;
       height: 100vh;
-      background: #ffffff;
-      border: none;
+      background: var(--bg-card);
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    /* ============ 头部（压缩高度） ============ */
+    /* ============ 头部 ============ */
     .card-header {
-      background: #1a1a2e;
-      padding: 1rem 2.5rem 0.9rem 2.5rem;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      padding: 1.1rem 2.5rem 1rem 2.5rem;
       color: white;
-      border-bottom: 3px solid #07c160;
       flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--green) 0%, #22c55e 50%, var(--green) 100%);
+    }
+
+    .card-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(7, 193, 96, 0.08) 0%, transparent 70%);
+      pointer-events: none;
     }
 
     .app-title {
@@ -50,92 +96,118 @@
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
     }
 
     .app-title h1 {
       font-size: 1.5rem;
-      font-weight: 600;
+      font-weight: 700;
       color: #ffffff;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .app-title h1::before {
+      content: '💬';
+      font-size: 1.4rem;
+      filter: drop-shadow(0 2px 4px rgba(7, 193, 96, 0.4));
     }
 
     .app-title .badge {
-      background: #07c160;
+      background: linear-gradient(135deg, var(--green) 0%, #22c55e 100%);
       color: white;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 600;
       padding: 3px 10px;
-      border: 1px solid #06ad56;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 2px 8px rgba(7, 193, 96, 0.3);
     }
 
     .subhead {
-      margin-top: 4px;
-      font-size: 0.85rem;
-      color: #b0b3c6;
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: #94a3b8;
       display: flex;
       align-items: center;
       gap: 10px;
       flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
     }
 
     .subhead .twu-icon {
-      background: #2d2d44;
+      background: rgba(255, 255, 255, 0.08);
       padding: 2px 10px;
-      font-size: 0.78rem;
-      color: #d0d4f0;
-      border: 1px solid #3f3f5e;
+      font-size: 0.75rem;
+      color: #cbd5e1;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: 500;
     }
 
-    /* ============ 主体：占满剩余高度 ============ */
+    .subhead .sep {
+      color: #475569;
+    }
+
+    /* ============ 主体 ============ */
     .card-body {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      padding: 1rem 2.5rem 1rem 2.5rem;
-      background: #ffffff;
+      padding: 1.2rem 2.5rem 1rem 2.5rem;
+      background: var(--bg-body);
       min-height: 0;
     }
 
     @media (max-width: 1200px) {
-      .card-header { padding: 1rem 1.5rem; }
-      .card-body { padding: 1rem 1.5rem; }
+      .card-header { padding: 1.1rem 1.5rem 1rem 1.5rem; }
+      .card-body { padding: 1.2rem 1.5rem 1rem 1.5rem; }
     }
 
-    /* 草稿提示（压缩） */
+    /* 草稿提示 */
     .draft-notice {
-      background: #eef4ff;
-      border-left: 5px solid #2563eb;
-      padding: 8px 14px;
-      margin-bottom: 0.8rem;
+      background: var(--blue-soft);
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid var(--blue);
+      padding: 9px 14px;
+      margin-bottom: 0.9rem;
       font-size: 0.82rem;
-      color: #1a4d8c;
+      color: #1e40af;
       display: none;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
       flex-shrink: 0;
+      border-radius: 6px;
     }
 
     .draft-notice.active { display: flex; }
 
     .draft-notice button {
       background: transparent;
-      border: 1px solid #2563eb;
-      color: #2563eb;
-      padding: 3px 10px;
+      border: 1px solid var(--blue);
+      color: var(--blue);
+      padding: 4px 12px;
       font-size: 0.75rem;
       cursor: pointer;
       font-weight: 600;
+      border-radius: 4px;
+      transition: all 0.15s;
     }
 
-    .draft-notice button:hover { background: #2563eb; color: white; }
+    .draft-notice button:hover { background: var(--blue); color: white; }
 
-    /* ============ 双栏主布局 ============ */
+    /* ============ 双栏 ============ */
     .main-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 2rem;
+      gap: 1.5rem;
       align-items: stretch;
       flex: 1;
       min-height: 0;
@@ -150,42 +222,77 @@
       }
     }
 
+    /* 每个栏都做成一个"卡片" */
     .left-column,
     .right-column {
       min-width: 0;
       display: flex;
       flex-direction: column;
       overflow-y: auto;
-      padding-right: 6px;
+      background: var(--bg-card);
+      border-radius: 10px;
+      box-shadow: var(--shadow-md);
+      padding: 1.4rem 1.5rem;
+      border: 1px solid var(--border);
     }
 
     .left-column::-webkit-scrollbar,
     .right-column::-webkit-scrollbar { width: 6px; }
 
     .left-column::-webkit-scrollbar-track,
-    .right-column::-webkit-scrollbar-track { background: #f1f5f9; }
+    .right-column::-webkit-scrollbar-track { background: transparent; }
 
     .left-column::-webkit-scrollbar-thumb,
-    .right-column::-webkit-scrollbar-thumb { background: #cbd5e1; }
+    .right-column::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
 
     .left-column::-webkit-scrollbar-thumb:hover,
     .right-column::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-    .intro-text {
-      background: #f7f8fc;
-      padding: 0.8rem 1.2rem;
-      margin-bottom: 0.9rem;
-      border-left: 5px solid #07c160;
-      font-size: 0.88rem;
-      color: #2c3e50;
-      line-height: 1.5;
-      border-top: 1px solid #e9ecf2;
-      border-right: 1px solid #e9ecf2;
-      border-bottom: 1px solid #e9ecf2;
+    /* 栏标题 */
+    .col-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
       flex-shrink: 0;
     }
 
-    .intro-text strong { color: #1a1a2e; font-weight: 700; }
+    .col-title .icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: var(--green-soft);
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .col-title .icon.blue {
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .intro-text {
+      background: var(--bg-soft);
+      padding: 0.8rem 1rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid var(--green);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      line-height: 1.6;
+      flex-shrink: 0;
+    }
+
+    .intro-text strong { color: var(--text-main); font-weight: 700; }
 
     /* ============ 统计面板 ============ */
     .stats-panel {
@@ -197,29 +304,49 @@
     }
 
     .stat-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-left: 3px solid #07c160;
-      padding: 8px 6px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 6px;
       text-align: center;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
     }
 
-    .stat-card.closed { border-left-color: #94a3b8; }
-    .stat-card.today { border-left-color: #f5a623; }
-    .stat-card.week { border-left-color: #2563eb; }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--green);
+    }
+
+    .stat-card.closed::before { background: var(--gray); }
+    .stat-card.today::before { background: var(--orange); }
+    .stat-card.week::before { background: var(--blue); }
+
+    .stat-card:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
 
     .stat-value {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       font-weight: 700;
-      color: #1a1a2e;
+      color: var(--text-main);
       line-height: 1.2;
+      font-variant-numeric: tabular-nums;
     }
 
     .stat-label {
       font-size: 0.68rem;
-      color: #7c8b9c;
+      color: var(--text-muted);
       margin-top: 2px;
       font-weight: 500;
+      letter-spacing: 0.02em;
     }
 
     @media (max-width: 620px) {
@@ -240,13 +367,13 @@
       align-items: center;
       margin-bottom: 0.8rem;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
       flex-shrink: 0;
     }
 
     .issues-header h2 {
-      font-size: 1rem;
-      color: #1a1a2e;
+      font-size: 0.95rem;
+      color: var(--text-main);
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -254,25 +381,35 @@
     }
 
     .issues-header h2 .count-badge {
-      background: #07c160;
-      color: white;
-      font-size: 0.72rem;
+      background: var(--green-soft);
+      color: var(--green-dark);
+      font-size: 0.7rem;
       padding: 2px 8px;
-      font-weight: 600;
+      font-weight: 700;
+      border-radius: 10px;
     }
 
     .refresh-btn {
-      background: #ffffff;
-      border: 1.5px solid #d0d7e3;
-      padding: 4px 10px;
-      font-size: 0.78rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
-      color: #334155;
+      color: var(--text-sub);
+      border-radius: 6px;
       transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
-    .refresh-btn:hover { background: #f1f5f9; }
+    .refresh-btn:hover {
+      background: var(--bg-soft);
+      border-color: var(--text-muted);
+      color: var(--text-main);
+    }
+
     .refresh-btn:disabled { opacity: 0.5; cursor: wait; }
 
     .filter-bar {
@@ -285,18 +422,20 @@
 
     .filter-bar input,
     .filter-bar select {
-      padding: 6px 10px;
-      font-size: 0.82rem;
-      border: 1.5px solid #d0d7e3;
-      background: #f8fafc;
+      padding: 7px 11px;
+      font-size: 0.8rem;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
       outline: none;
-      transition: border-color 0.15s;
+      border-radius: 6px;
+      transition: all 0.15s;
+      color: var(--text-main);
     }
 
     .filter-bar input:focus,
     .filter-bar select:focus {
-      border-color: #07c160;
-      background: #fff;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.1);
     }
 
     .filter-bar input { flex: 1; min-width: 100px; }
@@ -313,48 +452,65 @@
       padding-right: 4px;
     }
 
-    .issues-list::-webkit-scrollbar { width: 6px; }
-    .issues-list::-webkit-scrollbar-track { background: #f1f5f9; }
-    .issues-list::-webkit-scrollbar-thumb { background: #cbd5e1; }
-    .issues-list::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .issues-list::-webkit-scrollbar { width: 5px; }
+    .issues-list::-webkit-scrollbar-track { background: transparent; }
+    .issues-list::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
 
     .issue-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 8px 12px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-left: 4px solid #07c160;
+      padding: 9px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       transition: all 0.15s;
       text-decoration: none;
       color: inherit;
       cursor: pointer;
       flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .issue-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--green);
+      transition: width 0.15s;
     }
 
     .issue-item:hover {
-      background: #eef4ff;
-      border-left-color: #2563eb;
+      background: var(--bg-soft);
+      border-color: #cbd5e1;
+      transform: translateX(2px);
+      box-shadow: var(--shadow-sm);
     }
 
-    .issue-item.closed {
-      border-left-color: #94a3b8;
-      opacity: 0.75;
-    }
+    .issue-item:hover::before { width: 4px; }
+
+    .issue-item.closed { opacity: 0.7; }
+    .issue-item.closed::before { background: var(--gray); }
 
     .issue-status {
       flex-shrink: 0;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       line-height: 1;
     }
 
     .issue-info { flex: 1; min-width: 0; }
 
     .issue-title {
-      font-size: 0.86rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      color: #0f172a;
+      color: var(--text-main);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -362,40 +518,42 @@
 
     .issue-meta {
       font-size: 0.68rem;
-      color: #7c8b9c;
+      color: var(--text-muted);
       margin-top: 2px;
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .issue-meta .issue-number {
-      color: #07c160;
-      font-weight: 600;
+      color: var(--green);
+      font-weight: 700;
     }
 
     .issues-loading,
     .issues-empty,
     .issues-error {
-      padding: 20px;
+      padding: 24px 16px;
       text-align: center;
       font-size: 0.85rem;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      color: #7c8b9c;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
       flex-shrink: 0;
     }
 
     .issues-error {
-      background: #fdeeee;
-      color: #a02020;
-      border-color: #f0c0c0;
+      background: #fef2f2;
+      color: var(--red);
+      border-color: #fecaca;
     }
 
     .issues-empty {
-      color: #07c160;
-      background: #e6f9ed;
-      border-color: #b8e6cc;
+      color: var(--green-dark);
+      background: var(--green-soft);
+      border-color: #a7f3d0;
     }
 
     /* ============ 表单 ============ */
@@ -404,24 +562,25 @@
     .form-group label {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       font-weight: 600;
-      font-size: 0.86rem;
-      color: #1e293b;
+      font-size: 0.82rem;
+      color: var(--text-sub);
       margin-bottom: 6px;
     }
 
     .form-group label .required {
-      color: #e03a3a;
-      font-size: 1.1rem;
+      color: var(--red);
+      font-size: 1rem;
       line-height: 1;
     }
 
     .square-dot {
       display: inline-block;
-      width: 7px;
-      height: 7px;
-      background: #07c160;
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
       margin-right: 4px;
     }
 
@@ -429,55 +588,61 @@
       width: 100%;
       padding: 9px 12px;
       font-size: 0.88rem;
-      background: #f8fafc;
-      border: 1.5px solid #d0d7e3;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
       transition: all 0.15s ease;
-      color: #0f172a;
+      color: var(--text-main);
       resize: vertical;
       outline: none;
+      border-radius: 6px;
     }
 
+    .form-control:hover { border-color: #cbd5e1; }
+
     .form-control:focus {
-      border-color: #07c160;
+      border-color: var(--green);
       background: #ffffff;
-      box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.15);
+      box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.12);
     }
 
     .form-control.invalid {
-      border-color: #e03a3a;
-      background: #fff8f8;
+      border-color: var(--red);
+      background: #fef2f2;
     }
 
-    .form-control::placeholder { color: #9aa6b8; font-weight: 300; }
+    .form-control::placeholder { color: #94a3b8; font-weight: 400; }
 
-    textarea.form-control { min-height: 60px; }
+    textarea.form-control { min-height: 60px; line-height: 1.5; }
 
     select.form-control {
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239aa6b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
       background-size: 14px;
       cursor: pointer;
+      padding-right: 32px;
     }
 
     .char-counter {
       text-align: right;
       font-size: 0.68rem;
-      color: #94a3b8;
+      color: var(--text-muted);
       margin-top: 3px;
+      font-variant-numeric: tabular-nums;
     }
 
-    .char-counter.warn { color: #f5a623; }
-    .char-counter.over { color: #e03a3a; font-weight: 700; }
+    .char-counter.warn { color: var(--orange); }
+    .char-counter.over { color: var(--red); font-weight: 700; }
 
     .duplicate-hint {
       margin-top: 6px;
       padding: 8px 12px;
-      background: #fff8e6;
-      border-left: 4px solid #f5a623;
+      background: var(--orange-soft);
+      border-left: 3px solid var(--orange);
+      border-radius: 6px;
       font-size: 0.78rem;
-      color: #6b4e0a;
+      color: #92400e;
       display: none;
       line-height: 1.5;
     }
@@ -485,7 +650,7 @@
     .duplicate-hint.active { display: block; }
 
     .duplicate-hint a {
-      color: #a05e00;
+      color: #b45309;
       font-weight: 700;
       text-decoration: underline;
       cursor: pointer;
@@ -499,9 +664,10 @@
 
     @media (max-width: 620px) {
       .row-2col { grid-template-columns: 1fr; gap: 0; }
-      .card-header { padding: 1rem 1rem 0.8rem 1rem; }
+      .card-header { padding: 1rem; }
       .card-body { padding: 1rem; }
-      .app-title h1 { font-size: 1.3rem; }
+      .left-column, .right-column { padding: 1rem; }
+      .app-title h1 { font-size: 1.25rem; }
     }
 
     .action-buttons {
@@ -515,41 +681,54 @@
     }
 
     .btn {
-      border: 1.5px solid #d0d7e3;
-      padding: 10px 20px;
-      font-size: 0.86rem;
+      border: 1px solid var(--border);
+      padding: 9px 20px;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.15s ease;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      background: #ffffff;
-      color: #334155;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
+      gap: 6px;
+      background: var(--bg-card);
+      color: var(--text-sub);
+      border-radius: 6px;
+      letter-spacing: 0.02em;
     }
 
-    .btn:hover { background: #f1f5f9; border-color: #b8c2d0; }
+    .btn:hover {
+      background: var(--bg-soft);
+      border-color: #cbd5e1;
+      color: var(--text-main);
+    }
 
     .btn-primary {
-      background: #07c160;
-      border: 1.5px solid #07c160;
+      background: var(--green);
+      border-color: var(--green);
       color: white;
-      box-shadow: 0 4px 10px -4px rgba(7, 193, 96, 0.4);
+      box-shadow: 0 4px 12px -2px rgba(7, 193, 96, 0.35);
     }
 
-    .btn-primary:hover { background: #06ad56; border-color: #06ad56; }
+    .btn-primary:hover {
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+      color: white;
+      box-shadow: 0 6px 16px -2px rgba(7, 193, 96, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn:active { transform: translateY(0); }
 
     .btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
     }
 
     .toast-message {
       margin-top: 12px;
-      padding: 10px 14px;
+      padding: 11px 14px;
       font-weight: 500;
       display: flex;
       align-items: flex-start;
@@ -557,33 +736,29 @@
       font-size: 0.82rem;
       animation: fadeIn 0.2s ease;
       flex-shrink: 0;
+      border-radius: 6px;
+      line-height: 1.5;
     }
 
     .toast-info {
-      background: #eef4ff;
-      color: #1a4d8c;
-      border-left: 5px solid #2563eb;
-      border-top: 1px solid #b8d0f0;
-      border-right: 1px solid #b8d0f0;
-      border-bottom: 1px solid #b8d0f0;
+      background: var(--blue-soft);
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+      border-left: 3px solid var(--blue);
     }
 
     .toast-error {
-      background: #fdeeee;
-      color: #a02020;
-      border-left: 5px solid #e03a3a;
-      border-top: 1px solid #f0c0c0;
-      border-right: 1px solid #f0c0c0;
-      border-bottom: 1px solid #f0c0c0;
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      border-left: 3px solid var(--red);
     }
 
     .toast-success {
-      background: #e6f9ed;
-      color: #0b6e3b;
-      border-left: 5px solid #07c160;
-      border-top: 1px solid #b8e6cc;
-      border-right: 1px solid #b8e6cc;
-      border-bottom: 1px solid #b8e6cc;
+      background: var(--green-soft);
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      border-left: 3px solid var(--green);
     }
 
     @keyframes fadeIn {
@@ -596,7 +771,8 @@
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.55);
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
       z-index: 999;
       justify-content: center;
       align-items: center;
@@ -612,19 +788,30 @@
       width: 100%;
       max-height: 85vh;
       overflow-y: auto;
-      box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4);
-      border: 1px solid #d0d7e3;
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      overflow: hidden;
     }
 
     .modal-header {
-      background: #1a1a2e;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       color: white;
-      padding: 1rem 1.4rem;
+      padding: 1.1rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      border-bottom: 3px solid #07c160;
+      position: relative;
+    }
+
+    .modal-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--green) 0%, #22c55e 100%);
     }
 
     .modal-header h3 {
@@ -635,83 +822,89 @@
     }
 
     .modal-close {
-      background: transparent;
-      border: 1px solid #4a4a6a;
-      color: #d0d4f0;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
       width: 30px;
       height: 30px;
-      font-size: 1.1rem;
+      font-size: 1rem;
       cursor: pointer;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.15s;
+      border-radius: 6px;
     }
 
-    .modal-close:hover { background: #e03a3a; border-color: #e03a3a; color: white; }
+    .modal-close:hover {
+      background: var(--red);
+      border-color: var(--red);
+      color: white;
+    }
 
-    .modal-body { padding: 1.4rem; }
+    .modal-body { padding: 1.4rem 1.5rem; }
 
     .modal-meta {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
       margin-bottom: 1rem;
       padding-bottom: 1rem;
-      border-bottom: 1px solid #e2e8f0;
-      font-size: 0.82rem;
-      color: #7c8b9c;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      align-items: center;
     }
 
     .modal-meta span {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 4px;
+      padding: 3px 10px;
+      background: var(--bg-soft);
+      border-radius: 12px;
+      font-weight: 500;
     }
 
     .modal-body-content {
-      font-size: 0.9rem;
-      color: #2c3e50;
+      font-size: 0.88rem;
+      color: var(--text-sub);
       line-height: 1.7;
       white-space: pre-wrap;
       word-break: break-word;
       max-height: 40vh;
       overflow-y: auto;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       padding: 14px 16px;
     }
 
     .modal-footer {
-      padding: 1rem 1.4rem;
-      border-top: 1px solid #e2e8f0;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
       display: flex;
       justify-content: flex-end;
       gap: 10px;
       flex-wrap: wrap;
+      background: var(--bg-soft);
     }
 
-    .modal-footer .btn { padding: 8px 18px; font-size: 0.85rem; }
+    .modal-footer .btn { padding: 8px 18px; font-size: 0.82rem; }
 
-    /* ============ 底部（压缩） ============ */
+    /* ============ 底部 ============ */
     .footnote {
-      margin-top: 0.8rem;
+      margin-top: 1rem;
       padding-top: 0.8rem;
       font-size: 0.72rem;
-      color: #7c8b9c;
+      color: var(--text-muted);
       text-align: center;
-      border-top: 1px solid #d0d7e3;
       flex-shrink: 0;
+      letter-spacing: 0.02em;
     }
 
-    input, textarea, select, button, .form-control, .btn,
-    .intro-text, .toast-message, .bug-report-card, .issue-item, .stat-card,
-    .modal-content, .modal-close, .draft-notice {
-      border-radius: 0 !important;
-    }
-
-    ::placeholder { opacity: 0.7; }
+    ::placeholder { opacity: 1; }
   </style>
 </head>
 <body>
@@ -719,16 +912,16 @@
     <div class="card-header">
       <div class="app-title">
         <h1>微信twu</h1>
-        <span class="badge">Bug汇报</span>
+        <span class="badge">BUG 汇报</span>
       </div>
       <div class="subhead">
         <span class="twu-icon">TurboWarp 作品</span>
-        <span>· GitHub Issues 提交</span>
+        <span class="sep">·</span>
+        <span>GitHub Issues 提交</span>
       </div>
     </div>
 
     <div class="card-body">
-      <!-- 草稿恢复提示 -->
       <div class="draft-notice" id="draftNotice">
         <span>📝 检测到您上次填写的草稿，是否恢复？</span>
         <div style="display:flex;gap:8px;">
@@ -737,33 +930,28 @@
         </div>
       </div>
 
-      <!-- ============ 双栏主布局 ============ -->
       <div class="main-grid">
-
-        <!-- ===== 左栏：提交表单 ===== -->
+        <!-- 左栏 -->
         <div class="left-column">
-          <h2 style="font-size: 1.05rem; color: #1a1a2e; font-weight: 700; margin-bottom: 0.8rem;">
-            ✏️ 提交新的 Bug 报告
-          </h2>
+          <div class="col-title">
+            <span class="icon">✏️</span>
+            <span>提交新的 Bug 报告</span>
+          </div>
 
           <div class="intro-text">
-            <strong>🐞 发现微信twu的Bug了？</strong> 感谢你帮助改进！<br>
-            填写左侧表单提交新的 Bug，右侧可以查看已有报告～
+            <strong>发现微信twu的 Bug 了？</strong> 感谢你的反馈！<br>
+            填写下方表单提交，或查看右侧已有报告。
           </div>
 
           <form id="bugReportForm" onsubmit="return false;">
             <div class="row-2col">
-              <div>
-                <div class="form-group">
-                  <label><span class="square-dot"></span>你的昵称 <span class="required">*</span></label>
-                  <input type="text" class="form-control" id="nickname" placeholder="例如：小twu" maxlength="30">
-                </div>
+              <div class="form-group">
+                <label><span class="square-dot"></span>你的昵称 <span class="required">*</span></label>
+                <input type="text" class="form-control" id="nickname" placeholder="例如：小twu" maxlength="30">
               </div>
-              <div>
-                <div class="form-group">
-                  <label><span class="square-dot"></span>联系邮箱 (可选)</label>
-                  <input type="email" class="form-control" id="email" placeholder="方便回复你" maxlength="80">
-                </div>
+              <div class="form-group">
+                <label><span class="square-dot"></span>联系邮箱 (可选)</label>
+                <input type="email" class="form-control" id="email" placeholder="方便回复你" maxlength="80">
               </div>
             </div>
 
@@ -820,19 +1008,26 @@
 
             <div class="action-buttons">
               <button type="button" class="btn" onclick="clearForm()">清空</button>
-              <button type="submit" class="btn btn-primary" id="submitBtn" onclick="submitToGitHub()">提交到 GitHub Issues</button>
+              <button type="submit" class="btn btn-primary" id="submitBtn" onclick="submitToGitHub()">
+                <span>🚀</span> 提交到 GitHub
+              </button>
             </div>
           </form>
 
           <div id="messageContainer"></div>
         </div>
 
-        <!-- ===== 右栏：统计 + 列表 ===== -->
+        <!-- 右栏 -->
         <div class="right-column">
+          <div class="col-title">
+            <span class="icon blue">📋</span>
+            <span>已有 Bug 报告</span>
+          </div>
+
           <div class="stats-panel" id="statsPanel">
             <div class="stat-card">
               <div class="stat-value" id="statTotal">—</div>
-              <div class="stat-label">总 Bug 数</div>
+              <div class="stat-label">总数</div>
             </div>
             <div class="stat-card">
               <div class="stat-value" id="statOpen">—</div>
@@ -851,10 +1046,12 @@
           <div class="issues-section">
             <div class="issues-header">
               <h2>
-                📋 已有 Bug 报告
+                <span>全部报告</span>
                 <span class="count-badge" id="issueCount">—</span>
               </h2>
-              <button class="refresh-btn" id="refreshBtn" onclick="loadIssues()">🔄 刷新</button>
+              <button class="refresh-btn" id="refreshBtn" onclick="loadIssues()">
+                <span>🔄</span> 刷新
+              </button>
             </div>
 
             <div class="filter-bar">
@@ -867,11 +1064,10 @@
             </div>
 
             <div id="issuesContainer" style="display:flex;flex-direction:column;flex:1;min-height:0;">
-              <div class="issues-loading">⏳ 正在加载已有的 Bug 报告…</div>
+              <div class="issues-loading">⏳ 正在加载…</div>
             </div>
           </div>
         </div>
-
       </div>
 
       <div class="footnote">
@@ -880,7 +1076,7 @@
     </div>
   </div>
 
-  <!-- ============ 详情弹窗 ============ -->
+  <!-- 弹窗 -->
   <div class="modal-overlay" id="issueModal" onclick="closeModalOnOverlay(event)">
     <div class="modal-content">
       <div class="modal-header">
@@ -893,15 +1089,12 @@
       </div>
       <div class="modal-footer">
         <button class="btn" onclick="closeModal()">关闭</button>
-        <a class="btn btn-primary" id="modalGithubLink" href="#" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">去 GitHub 查看完整讨论 →</a>
+        <a class="btn btn-primary" id="modalGithubLink" href="#" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">去 GitHub 查看 →</a>
       </div>
     </div>
   </div>
 
   <script>
-    /* ============================================================
-       ★★★  GitHub 仓库配置  ★★★
-       ============================================================ */
     const GITHUB_CONFIG = {
       owner: "Jiadan209",
       repo: "wechat-twu-bugs",
@@ -987,8 +1180,8 @@
       const refreshBtn = document.getElementById('refreshBtn');
 
       refreshBtn.disabled = true;
-      refreshBtn.textContent = '⏳ 加载中…';
-      container.innerHTML = '<div class="issues-loading">⏳ 正在加载已有的 Bug 报告…</div>';
+      refreshBtn.innerHTML = '<span>⏳</span> 加载中';
+      container.innerHTML = '<div class="issues-loading">⏳ 正在加载…</div>';
 
       try {
         const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues?state=all&per_page=50&sort=created&direction=desc`;
@@ -1009,17 +1202,17 @@
         container.innerHTML = `
           <div class="issues-error">
             ❌ 加载失败：${escapeHtml(err.message)}<br>
-            <span style="font-size:0.82rem;">
-              可能是网络问题或 API 限制，请稍后重试，或直接访问 
+            <span style="font-size:0.8rem;">
+              请稍后重试，或直接访问 
               <a href="https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues" 
-                 target="_blank" style="color:#a02020;font-weight:700;">GitHub Issues 页面</a>。
+                 target="_blank" style="color:#ef4444;font-weight:700;">GitHub Issues 页面</a>。
             </span>
           </div>
         `;
         document.getElementById('issueCount').textContent = '?';
       } finally {
         refreshBtn.disabled = false;
-        refreshBtn.textContent = '🔄 刷新';
+        refreshBtn.innerHTML = '<span>🔄</span> 刷新';
       }
     }
 
@@ -1059,9 +1252,9 @@
 
       if (filtered.length === 0) {
         if (allIssues.length === 0) {
-          container.innerHTML = `<div class="issues-empty">✨ 还没有人提交过 Bug，你可能是第一个发现问题的！</div>`;
+          container.innerHTML = `<div class="issues-empty">✨ 还没有人提交过 Bug</div>`;
         } else {
-          container.innerHTML = `<div class="issues-loading">🔍 没有匹配的 Bug 报告，换个关键词试试～</div>`;
+          container.innerHTML = `<div class="issues-loading">🔍 没有匹配的报告</div>`;
         }
         return;
       }
@@ -1194,7 +1387,7 @@
         ).join('<br>');
 
         hint.innerHTML = `⚠️ <strong>发现相似的已有报告：</strong><br>${links}<br>
-          <span style="font-size:0.78rem;">如果已有人报告过，请到对应 Issue 下补充信息，避免重复提交。</span>`;
+          <span style="font-size:0.75rem;">如果已有人报告过，请到对应 Issue 下补充信息。</span>`;
         hint.classList.add('active');
       }
     }
@@ -1294,9 +1487,9 @@
       try { localStorage.setItem(SUBMIT_LIMIT_KEY, String(Date.now())); } catch (e) {}
 
       const submitBtn = document.getElementById('submitBtn');
-      const originalText = submitBtn.textContent;
+      const originalText = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.textContent = '⏳ 正在跳转…';
+      submitBtn.innerHTML = '<span>⏳</span> 正在跳转…';
 
       container.innerHTML = `
         <div class="toast-message toast-info">
@@ -1304,8 +1497,8 @@
           <div>
             <strong>正在打开 GitHub Issues 页面…</strong><br>
             如果浏览器没有自动跳转，请
-            <a href="${issueUrl}" target="_blank" rel="noopener noreferrer" style="color:#1a4d8c;font-weight:700;">点击此链接手动打开</a>。<br>
-            <span style="font-size:0.82rem;opacity:0.8;">在 GitHub 页面上确认内容后，点击 "Submit new issue" 即可发布。</span>
+            <a href="${issueUrl}" target="_blank" rel="noopener noreferrer" style="color:#1e40af;font-weight:700;">点击此链接手动打开</a>。<br>
+            <span style="font-size:0.8rem;opacity:0.8;">在 GitHub 页面上确认后点 "Submit new issue" 发布。</span>
           </div>
         </div>
       `;
@@ -1315,7 +1508,7 @@
 
       setTimeout(function() {
         submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
+        submitBtn.innerHTML = originalText;
         try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
         loadIssues();
       }, 3000);
