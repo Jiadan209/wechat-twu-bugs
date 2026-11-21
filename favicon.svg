@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="微信twu Bug 汇报站">
+  <rect width="64" height="64" rx="14" fill="#07c160"/>
+  <path d="M32 13c-11 0-20 7.5-20 16.7 0 5.3 3 10 7.8 13.1l-2 6.6 7.4-3.8c2.2.7 4.5 1 6.8 1 11 0 20-7.5 20-16.9S43 13 32 13z" fill="#fff"/>
+  <circle cx="25" cy="29.5" r="2.6" fill="#07c160"/>
+  <circle cx="39" cy="29.5" r="2.6" fill="#07c160"/>
+</svg>
