@@ -2,6 +2,7 @@ import { GITHUB_CONFIG } from './config.js';
 import { $, escapeHtml, debounce } from './utils.js';
 import { state } from './store.js';
 import { fetchIssues, isConfigValid, cacheRemainMs } from './api.js';
+import { setIssueCount } from './tab.js';
 
 let refreshLabelTimer = null;
 let loadVersion = 0;
@@ -136,6 +137,9 @@ export function renderIssues() {
   list.sort(SORTERS[sortKey] || SORTERS.created);
   countBadge.textContent = list.length;
 
+  // 同步 Tab 徽标（用总数，不受筛选影响）
+  setIssueCount(state.allIssues.length);
+
   if (list.length === 0) {
     if (state.allIssues.length === 0) {
       container.innerHTML = '<div class="issues-empty">✨ 还没有人提交过 Bug，快来当第一个吧！</div>';
@@ -153,11 +157,6 @@ export function renderIssues() {
       : '';
     const statusText = isOpen ? '未解决' : '已解决';
 
-    /*
-     * 注意：aria-label 已经完整描述了「状态」，
-     * 不要再放一个 <span class="sr-only">${statusText}</span>，
-     * 否则屏幕阅读器会把状态朗读两遍。
-     */
     return '' +
       '<li class="issue-item ' + (isOpen ? '' : 'closed') + '" role="button" tabindex="0"' +
       ' data-issue="' + issue.number + '"' +
