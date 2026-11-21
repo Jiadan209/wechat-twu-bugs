@@ -22,7 +22,7 @@
 
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* 列表被分页上限截断时的提示条 */
+    /* 1. 列表被分页上限截断时的提示条 */
     .truncate-note {
       font-size: 13px;
       line-height: 1.6;
@@ -32,13 +32,148 @@
       padding: 8px 12px;
       margin-bottom: 10px;
     }
-    /* 邮箱公开提示 */
+
+    /* 2. 邮箱公开提示 */
     .field-hint {
       margin: 6px 0 0;
       font-size: 12px;
       line-height: 1.5;
       color: #b45309;
     }
+
+    /* 3. 严重程度：色块单选，替代下拉 */
+    .severity-group {
+      border: 0;
+      margin: 0 0 1.05rem;
+      padding: 0;
+      min-width: 0;
+    }
+    .severity-group legend {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      margin-bottom: 7px;
+      padding: 0;
+      letter-spacing: 0.01em;
+    }
+    .severity-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .severity-options .sev-option {
+      --sev: #94a3b8;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin: 0;
+      padding: 10px 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .severity-options .sev-option[data-sev="一般"] { --sev: #f59e0b; }
+    .severity-options .sev-option[data-sev="严重"] { --sev: #f97316; }
+    .severity-options .sev-option[data-sev="致命"] { --sev: #ef4444; }
+    .severity-options .sev-option input {
+      position: absolute;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+      margin: 0;
+    }
+    .severity-options .sev-option .sev-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--sev);
+      flex-shrink: 0;
+    }
+    .severity-options .sev-option:has(input:checked) {
+      color: var(--sev);
+      border-color: var(--sev);
+      box-shadow: inset 0 0 0 1px var(--sev);
+      background: var(--bg-card);
+    }
+    .severity-options .sev-option:has(input:focus-visible) {
+      outline: 2px solid var(--green);
+      outline-offset: 2px;
+    }
+    @media (max-width: 620px) {
+      .severity-options { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* 4. 快捷筛选芯片（替代状态下拉） */
+    .quick-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .quick-chips .chip {
+      padding: 5px 12px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+    .quick-chips .chip:hover {
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+    .quick-chips .chip.active {
+      color: var(--green-text);
+      background: var(--green-soft);
+      border-color: rgba(7, 193, 96, 0.35);
+    }
+    .quick-chips .chip[data-chip="urgent"].active {
+      color: #b45309;
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+
+    /* 5. 列表：严重程度色条 + 标签 + 标题两行截断 */
+    .issue-item.sev-致命::before { background: #ef4444; }
+    .issue-item.sev-严重::before { background: #f97316; }
+    .issue-item.sev-一般::before { background: #f59e0b; }
+    .issue-item.sev-轻微::before { background: #94a3b8; }
+
+    .issue-item .sev-tag {
+      font-size: 0.66rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 8px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .issue-item .sev-tag.sev-致命 { background: #ef4444; }
+    .issue-item .sev-tag.sev-严重 { background: #f97316; }
+    .issue-item .sev-tag.sev-一般 { background: #f59e0b; }
+    .issue-item .sev-tag.sev-轻微 { background: #94a3b8; }
+
+    .issue-title {
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
     @media (prefers-color-scheme: dark) {
       .truncate-note { color: #9ca3af; background: #1f2430; }
       .field-hint { color: #fbbf24; }
@@ -153,17 +288,42 @@
                 </select>
               </div>
               <div class="form-group">
-                <label for="severity">
-                  <span class="square-dot" aria-hidden="true"></span>严重程度
+                <label for="env">
+                  <span class="square-dot" aria-hidden="true"></span>运行环境
                 </label>
-                <select class="form-control" id="severity">
-                  <option value="轻微">轻微 — 不影响使用</option>
-                  <option value="一般" selected>一般 — 有点烦人</option>
-                  <option value="严重">严重 — 无法正常聊天</option>
-                  <option value="致命">致命 — 完全崩溃</option>
+                <select class="form-control" id="env">
+                  <option value="未说明" selected>未说明</option>
+                  <option value="TurboWarp 网页版">TurboWarp 网页版</option>
+                  <option value="TurboWarp 客户端">TurboWarp 客户端</option>
+                  <option value="手机浏览器">手机浏览器</option>
+                  <option value="其他环境">其他环境</option>
                 </select>
               </div>
             </div>
+
+            <fieldset class="severity-group">
+              <legend>
+                <span class="square-dot" aria-hidden="true"></span>严重程度
+              </legend>
+              <div class="severity-options" role="radiogroup" aria-label="严重程度">
+                <label class="sev-option" data-sev="轻微">
+                  <input type="radio" name="severity" value="轻微">
+                  <span class="sev-dot" aria-hidden="true"></span>轻微
+                </label>
+                <label class="sev-option" data-sev="一般">
+                  <input type="radio" name="severity" value="一般" checked>
+                  <span class="sev-dot" aria-hidden="true"></span>一般
+                </label>
+                <label class="sev-option" data-sev="严重">
+                  <input type="radio" name="severity" value="严重">
+                  <span class="sev-dot" aria-hidden="true"></span>严重
+                </label>
+                <label class="sev-option" data-sev="致命">
+                  <input type="radio" name="severity" value="致命">
+                  <span class="sev-dot" aria-hidden="true"></span>致命
+                </label>
+              </div>
+            </fieldset>
 
             <div class="form-group">
               <label for="bugDescription">
@@ -184,6 +344,16 @@
                         placeholder="1. 打开微信twu聊天界面&#10;2. 点击输入框输入文字&#10;3. 快速点击发送三次"
                         maxlength="600"></textarea>
               <div class="char-counter" id="stepsCounter">0 / 600</div>
+            </div>
+
+            <div class="form-group">
+              <label for="screenshot">
+                <span class="square-dot" aria-hidden="true"></span>截图 / 日志 (可选)
+              </label>
+              <textarea class="form-control" id="screenshot"
+                        placeholder="粘贴图片链接或错误日志文本&#10;例如：https://你的图床/截图.png"
+                        maxlength="2000" aria-describedby="screenshotCounter"></textarea>
+              <div class="char-counter" id="screenshotCounter">0 / 2000</div>
             </div>
 
             <div class="action-buttons">
@@ -234,14 +404,17 @@
               </button>
             </div>
 
+            <!-- 快捷筛选：替代原来的状态下拉 -->
+            <div class="quick-chips" id="quickChips" role="group" aria-label="快捷筛选">
+              <button type="button" class="chip active" data-chip="all">全部</button>
+              <button type="button" class="chip" data-chip="open">未解决</button>
+              <button type="button" class="chip" data-chip="urgent">紧急</button>
+              <button type="button" class="chip" data-chip="closed">已解决</button>
+            </div>
+
             <div class="filter-bar">
               <input type="text" id="searchInput" placeholder="🔍 搜索关键词"
                      aria-label="搜索 Bug 报告" autocomplete="off">
-              <select id="stateFilter" aria-label="按状态筛选">
-                <option value="all">全部状态</option>
-                <option value="open">未解决</option>
-                <option value="closed">已解决</option>
-              </select>
               <select id="sortFilter" aria-label="排序方式">
                 <option value="created">最新创建</option>
                 <option value="comments">最多评论</option>

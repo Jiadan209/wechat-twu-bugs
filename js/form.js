@@ -3,6 +3,22 @@ import {
 } from './config.js';
 import { $, readLocal, writeLocal, removeLocal } from './utils.js';
 
+/* ---------- 严重程度（单选组） ---------- */
+const SEVERITY_VALUES = ['轻微', '一般', '严重', '致命'];
+
+export function getSeverity() {
+  const checked = document.querySelector('input[name="severity"]:checked');
+  return checked ? checked.value : '一般';
+}
+
+export function setSeverity(value) {
+  const target = SEVERITY_VALUES.indexOf(value) !== -1 ? value : '一般';
+  const radios = document.querySelectorAll('input[name="severity"]');
+  Array.prototype.forEach.call(radios, (radio) => {
+    radio.checked = radio.value === target;
+  });
+}
+
 /* ---------- 草稿 ---------- */
 let lastDraftSnapshot = '';
 
@@ -12,14 +28,19 @@ export function getFormData() {
     email: $('#email').value,
     bugTitle: $('#bugTitle').value,
     bugType: $('#bugType').value,
-    severity: $('#severity').value,
+    env: $('#env').value,
+    severity: getSeverity(),
     bugDescription: $('#bugDescription').value,
-    steps: $('#steps').value
+    steps: $('#steps').value,
+    screenshot: $('#screenshot').value
   };
 }
 
 export function hasDraftContent(data) {
-  return !!(data && (data.nickname || data.email || data.bugTitle || data.bugDescription || data.steps));
+  return !!(data && (
+    data.nickname || data.email || data.bugTitle || data.bugDescription ||
+    data.steps || data.screenshot
+  ));
 }
 
 export function saveDraft() {
@@ -53,9 +74,11 @@ export function applyDraftToForm(data) {
   $('#email').value = data.email || '';
   $('#bugTitle').value = data.bugTitle || '';
   $('#bugType').value = data.bugType || '界面显示';
-  $('#severity').value = data.severity || '一般';
+  $('#env').value = data.env || '未说明';
+  setSeverity(data.severity);
   $('#bugDescription').value = data.bugDescription || '';
   $('#steps').value = data.steps || '';
+  $('#screenshot').value = data.screenshot || '';
   // 让后续 saveDraft 以"恢复后的状态"为起点，避免立刻触发一次无谓写入
   lastDraftSnapshot = JSON.stringify(getFormData());
 }
@@ -76,13 +99,15 @@ export function updateAllCounters() {
   updateCounter('bugTitle', 'titleCounter', 80);
   updateCounter('bugDescription', 'descCounter', 1000);
   updateCounter('steps', 'stepsCounter', 600);
+  updateCounter('screenshot', 'screenshotCounter', 2000);
 }
 
 /* ---------- 内联错误 ---------- */
 /* 这些输入框除了错误信息外，本来就带一段常态说明，清错误时要还原回去 */
 const DEFAULT_DESCRIBEDBY = {
   bugTitle: 'titleCounter',
-  email: 'emailPrivacyHint'
+  email: 'emailPrivacyHint',
+  screenshot: 'screenshotCounter'
 };
 
 export function showFieldError(el, message) {
@@ -136,22 +161,34 @@ export function buildIssueBody() {
   const nickname = $('#nickname').value.trim();
   const email = $('#email').value.trim() || '(未填写)';
   const bugType = $('#bugType').value;
-  const severity = $('#severity').value;
+  const env = $('#env').value;
+  const severity = getSeverity();
   const bugDesc = $('#bugDescription').value.trim();
   const steps = $('#steps').value.trim() || '(未填写)';
+  const screenshot = $('#screenshot').value.trim();
 
-  return [
+  const lines = [
     '### 🐞 Bug 描述', '', bugDesc, '',
     '### 📋 复现步骤', '', steps, '',
     '### 📊 问题信息', '',
     '- **问题类型**：' + bugType,
-    '- **严重程度**：' + severity, '',
+    '- **严重程度**：' + severity,
+    '- **运行环境**：' + env, ''
+  ];
+
+  if (screenshot) {
+    lines.push('### 🖼️ 截图 / 日志', '', screenshot, '');
+  }
+
+  lines.push(
     '### 👤 报告者信息', '',
     '- **昵称**：' + nickname,
     '- **联系邮箱**：' + email, '',
     '---',
     '*由微信twu Bug汇报站提交 — ' + new Date().toLocaleString('zh-CN') + '*'
-  ].join('\n');
+  );
+
+  return lines.join('\n');
 }
 
 export function buildIssueUrl() {
@@ -183,7 +220,7 @@ export function recordSubmitTime() {
 
 /* ---------- 清空表单字段 ---------- */
 export function resetFormFields() {
-  ['nickname', 'email', 'bugTitle', 'bugDescription', 'steps'].forEach((id) => {
+  ['nickname', 'email', 'bugTitle', 'bugDescription', 'steps', 'screenshot'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) {
       el.value = '';
@@ -191,5 +228,6 @@ export function resetFormFields() {
     }
   });
   $('#bugType').value = '界面显示';
-  $('#severity').value = '一般';
+  $('#env').value = '未说明';
+  setSeverity('一般');
 }
