@@ -12,5 +12,7 @@ export const state = {
   /* 快捷筛选：all / open / urgent / closed */
   quick: 'all',
   lastFocusedElement: null,
-  currentModalNumber: null
+  currentModalNumber: null,
+  /* 当前弹窗对应的 Issue 对象（用于复制 Markdown） */
+  currentIssue: null
 };
