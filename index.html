@@ -7,7 +7,7 @@
   <title>微信twu · Bug汇报站</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body data-active-tab="form">
   <noscript>
     <div style="padding: 24px; margin: 24px; text-align: center; background: #fee2e2; color: #991b1b; border-radius: 10px; font-family: -apple-system, sans-serif;">
       ⚠️ 本页面需要启用 JavaScript 才能正常使用。
@@ -35,9 +35,24 @@
         </div>
       </div>
 
-      <div class="main-grid">
+      <!-- Tab 栏（桌面端隐藏，≤960px 显示） -->
+      <div class="tab-list" id="tabList" role="tablist" aria-label="视图切换">
+        <button type="button" class="tab-btn active" id="tabForm"
+                role="tab" data-tab="form"
+                aria-selected="true" aria-controls="panelForm" tabindex="0">
+          <span aria-hidden="true">✏️</span> 提交报告
+        </button>
+        <button type="button" class="tab-btn" id="tabIssues"
+                role="tab" data-tab="issues"
+                aria-selected="false" aria-controls="panelIssues" tabindex="-1">
+          <span aria-hidden="true">📋</span> 已有报告
+          <span class="tab-count" id="tabIssueCount"></span>
+        </button>
+      </div>
+
+      <div class="main-grid" id="mainGrid" data-tab="form">
         <!-- 左栏 -->
-        <div class="left-column">
+        <div class="left-column" id="panelForm" role="tabpanel" aria-labelledby="tabForm">
           <div class="col-title">
             <span class="icon" aria-hidden="true">✏️</span>
             <span>提交新的 Bug 报告</span>
@@ -141,7 +156,7 @@
         </div>
 
         <!-- 右栏 -->
-        <div class="right-column">
+        <div class="right-column" id="panelIssues" role="tabpanel" aria-labelledby="tabIssues">
           <div class="col-title">
             <span class="icon blue" aria-hidden="true">📋</span>
             <span>已有 Bug 报告</span>
