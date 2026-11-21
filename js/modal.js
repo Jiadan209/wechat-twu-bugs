@@ -1,8 +1,68 @@
 import { GITHUB_CONFIG } from './config.js';
-import { $, escapeHtml } from './utils.js';
+import { $, escapeHtml, copyText } from './utils.js';
 import { state } from './store.js';
 import { renderMarkdown } from './markdown.js';
 import { fetchIssueDetail, fetchComments } from './api.js';
+
+/* ---------- 深链：?issue=5 ---------- */
+function syncUrlIssue(number) {
+  try {
+    const url = new URL(window.location.href);
+    if (number) url.searchParams.set('issue', String(number));
+    else url.searchParams.delete('issue');
+    const next = url.pathname + (url.search || '') + (url.hash || '');
+    window.history.replaceState(null, '', next);
+  } catch (e) { /* 隐私模式等场景下不可用，忽略 */ }
+}
+
+export function issueShareUrl(number) {
+  return window.location.origin + window.location.pathname + '?issue=' + number;
+}
+
+/* 复制当前报告的单条链接 */
+export async function copyIssueLink() {
+  const n = state.currentModalNumber;
+  if (!n) return false;
+  return copyText(issueShareUrl(n));
+}
+
+/* 复制当前报告的 Markdown 摘要，方便粘到群里讨论 */
+export async function copyIssueMarkdown() {
+  const issue = state.currentIssue;
+  if (!issue) return false;
+  const statusText = issue.state === 'open' ? '未解决' : '已解决';
+  const date = new Date(issue.created_at).toLocaleDateString('zh-CN');
+  const md = [
+    '## ' + issue.title,
+    '',
+    '> #' + issue.number + ' · ' + statusText + ' · ' + date,
+    '',
+    (issue.body || '(无描述)'),
+    '',
+    '原帖：' + (issue.html_url || issueShareUrl(issue.number))
+  ].join('\n');
+  return copyText(md);
+}
+
+function flashCopyFeedback(btn, ok) {
+  if (!btn) return;
+  const original = btn.dataset.originalLabel || btn.innerHTML;
+  btn.dataset.originalLabel = original;
+  btn.innerHTML = ok ? '✅ 已复制' : '❌ 复制失败';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.innerHTML = original;
+    btn.disabled = false;
+  }, 1600);
+}
+
+export function copyLinkWithFeedback(btn) {
+  copyIssueLink().then((ok) => flashCopyFeedback(btn, ok));
+}
+
+export function copyMarkdownWithFeedback(btn) {
+  copyIssueMarkdown().then((ok) => flashCopyFeedback(btn, ok));
+}
 
 /* ---------- 滚动锁 ----------
  * 只用 overflow:hidden 在 iOS Safari 上常常锁不住，
@@ -66,6 +126,8 @@ export function closeModal() {
   setBackgroundInert(false);
   unlockScroll();
   state.currentModalNumber = null;
+  state.currentIssue = null;
+  syncUrlIssue(0);
   if (state.lastFocusedElement && typeof state.lastFocusedElement.focus === 'function') {
     state.lastFocusedElement.focus();
   }
@@ -169,6 +231,7 @@ export async function openIssueModal(issueNumber) {
   const cached = state.allIssues.find((i) => i.number === issueNumber);
 
   state.currentModalNumber = issueNumber;
+  state.currentIssue = cached || null;
 
   $('#modalTitle').textContent = '加载中…';
   $('#modalMeta').innerHTML = '';
@@ -178,12 +241,16 @@ export async function openIssueModal(issueNumber) {
     'https://github.com/' + GITHUB_CONFIG.owner + '/' + GITHUB_CONFIG.repo + '/issues/' + issueNumber;
 
   openModal();
+  syncUrlIssue(issueNumber);     // 地址栏带上 ?issue=N，方便直接分享
 
   if (cached) renderModalContent(cached);
 
   try {
     const data = await fetchIssueDetail(issueNumber);
-    if (state.currentModalNumber === issueNumber) renderModalContent(data);
+    if (state.currentModalNumber === issueNumber) {
+      state.currentIssue = data;
+      renderModalContent(data);
+    }
   } catch (e) {
     if (state.currentModalNumber === issueNumber && !cached) {
       $('#modalBody').innerHTML =
