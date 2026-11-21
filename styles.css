@@ -9,7 +9,7 @@
 
   --text-main: #0f172a;
   --text-sub: #475569;
-  --text-muted: #64748b;          /* 由 #94a3b8 调整，满足 4.5:1 对比度 */
+  --text-muted: #64748b;
 
   --border: #e6eaf1;
   --border-strong: #cbd5e1;
@@ -55,7 +55,7 @@
 
     --text-main: #e5e9f0;
     --text-sub: #a3b1c6;
-    --text-muted: #7d8da3;        /* 暗色同步提升对比度 */
+    --text-muted: #7d8da3;
 
     --border: #1f2a3d;
     --border-strong: #2c3a52;
@@ -284,7 +284,6 @@ body {
 }
 
 @media (max-width: 960px) {
-  /* 取消 main-grid 自身滚动，统一由 card-body 承担，避免双层滚动条 */
   .main-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -345,7 +344,6 @@ body {
   background: var(--text-muted);
 }
 
-/* Firefox 细滚动条 */
 .issues-list,
 .modal-body-content,
 .modal-content,
@@ -444,7 +442,6 @@ body {
 
 .stat-card.closed::before { background: var(--gray); }
 .stat-card.week::before { background: var(--blue); }
-/* 注：DOM 中不存在 .stat-card.today，已删除对应死代码 */
 
 .stat-card:hover {
   transform: translateY(-2px);
@@ -621,7 +618,7 @@ body {
 .issue-item:hover {
   background: var(--bg-soft);
   border-color: var(--border-strong);
-  transform: translateY(-1px);      /* 由 translateX(2px) 改为上浮，层次更明显 */
+  transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
 
@@ -818,7 +815,6 @@ select.form-control {
   display: block;
   animation: fadeIn 0.2s ease;
 }
-
 
 .row-2col {
   display: grid;
@@ -1061,7 +1057,6 @@ select.form-control {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 14px 16px;
-  /* 注意：已移除 white-space: pre-wrap，改由 Markdown 渲染生成块级元素 */
 }
 
 .modal-footer {
@@ -1134,8 +1129,7 @@ select.form-control {
 }
 
 /* ================================================================
-   新增 / 优化补丁样式
-   （无障碍辅助、内联校验、骨架屏、Markdown、评论、标签、空状态等）
+   补丁样式（无障碍 / 内联校验 / 骨架屏 / Markdown / 评论 / 标签等）
    ================================================================ */
 
 /* ---------- 屏幕阅读器专用 ---------- */
@@ -1186,7 +1180,7 @@ select.form-control {
   100% { background-position: 200% 0; }
 }
 
-/* ---------- 无匹配状态（区别于绿色空状态） ---------- */
+/* ---------- 无匹配状态 ---------- */
 .issues-no-match {
   padding: 26px 16px;
   text-align: center;
@@ -1410,6 +1404,7 @@ select.form-control {
   margin: 0 0 0.5em;
   padding-left: 1.4em;
 }
+
 /* ================================================================
    Tab 栏：桌面端隐藏，≤960px 显示（移动端单栏切换）
    ================================================================ */
