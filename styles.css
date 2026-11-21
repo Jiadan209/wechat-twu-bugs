@@ -1410,3 +1410,94 @@ select.form-control {
   margin: 0 0 0.5em;
   padding-left: 1.4em;
 }
+/* ================================================================
+   Tab 栏：桌面端隐藏，≤960px 显示（移动端单栏切换）
+   ================================================================ */
+
+.tab-list {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .tab-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 0.9rem;
+    padding: 5px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+    flex-shrink: 0;
+  }
+
+  .tab-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-sub);
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .tab-btn:hover {
+    color: var(--text-main);
+    background: var(--bg-soft);
+  }
+
+  .tab-btn.active {
+    color: #fff;
+    background: linear-gradient(135deg, var(--green) 0%, #22c55e 100%);
+    box-shadow: 0 4px 12px -4px rgba(7, 193, 96, 0.5);
+  }
+
+  .tab-btn.active:hover {
+    color: #fff;
+  }
+
+  /* 激活的绿色 tab 上，绿色 outline 看不清，换白色 */
+  .tab-btn.active:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+
+  .tab-count {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 8px;
+    background: var(--green-soft);
+    color: var(--green-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tab-btn.active .tab-count {
+    background: rgba(255, 255, 255, 0.24);
+    color: #fff;
+  }
+
+  /* 单栏切换：按 data-tab 隐藏另一侧 */
+  .main-grid[data-tab="form"] .right-column,
+  .main-grid[data-tab="issues"] .left-column {
+    display: none;
+  }
+
+  /* 「已有报告」视图下，草稿提示无意义，一并隐藏 */
+  body[data-active-tab="issues"] .draft-notice.active {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-btn { transition-duration: 0.01ms !important; }
+}
