@@ -600,8 +600,6 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   transition: all 0.18s ease;
-  text-decoration: none;
-  color: inherit;
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
@@ -821,12 +819,6 @@ select.form-control {
   animation: fadeIn 0.2s ease;
 }
 
-.duplicate-hint a {
-  color: var(--orange-text);
-  font-weight: 700;
-  text-decoration: underline;
-  cursor: pointer;
-}
 
 .row-2col {
   display: grid;
