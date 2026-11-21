@@ -20,31 +20,46 @@ export function parseSeverity(body) {
 function renderSkeleton(container) {
   container.innerHTML =
     '<div class="skeleton-list" aria-hidden="true">' +
-    new Array(5).join('<div class="skeleton-row"></div>') +
+    '<div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div>' +
     '</div>';
 }
 
 function renderIssuesError(err) {
   const container = $('#issuesContainer');
   const ghUrl = 'https://github.com/' + GITHUB_CONFIG.owner + '/' + GITHUB_CONFIG.repo + '/issues';
-  const link = '<br><a class="err-link" href="' + ghUrl + '" target="_blank" rel="noopener noreferrer">前往 GitHub Issues 页面 →</a>';
+  const link = ' <a class="err-link" href="' + ghUrl + '" target="_blank" rel="noopener noreferrer">直接去 GitHub 看 →</a>';
 
   let html;
   if (err && err.type === 'rate-limit') {
-    html = '⏳ GitHub API 触发限流，预计约 <strong>' + err.minutes +
-      ' 分钟</strong>后恢复，请稍后再刷新。' + link;
+    html = '⏳ GitHub 接口限流，约 <strong>' + err.minutes +
+      ' 分钟</strong>后恢复' + link;
   } else if (err && err.type === 'not-found') {
-    html = '❌ 仓库不存在或为私有仓库，无法读取 Issue 列表。' + link;
+    html = '❌ 仓库不存在或为私有仓库' + link;
   } else if (err && err.type === 'timeout') {
-    html = '⏱️ 请求超时，请检查网络后重新刷新。' + link;
+    html = '⏱️ 请求超时，请刷新重试' + link;
   } else if (err && err.type === 'network') {
-    html = '📡 网络异常，无法连接 GitHub。请检查网络后重新刷新。';
+    html = '📡 网络异常，暂时连不上 GitHub';
   } else {
     const status = err && err.status ? err.status : '未知';
-    html = '❌ 加载失败（状态码 ' + escapeHtml(status) + '）。' + link;
+    html = '❌ 加载失败（状态码 ' + escapeHtml(status) + '）' + link;
   }
 
   container.innerHTML = '<div class="issues-error">' + html + '</div>';
+}
+
+/* 兜底提示：说明列表来自旧缓存，以及多久恢复 */
+function staleNoteHtml() {
+  if (!state.stale) return '';
+  const when = state.cachedAt
+    ? new Date(state.cachedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    : '';
+  const reason = state.staleMinutes > 0
+    ? 'GitHub 接口限流中，约 ' + state.staleMinutes + ' 分钟后自动恢复'
+    : '网络暂时不通';
+  return '<div class="truncate-note stale-note">🕒 显示的是' +
+    (when ? ' ' + when + ' ' : '') + '的缓存数据（' + reason + '）' +
+    '<button type="button" class="stale-retry" id="staleRetryBtn">重试</button>' +
+    '</div>';
 }
 
 /* ---------- 刷新按钮的缓存倒计时 ---------- */
@@ -101,12 +116,16 @@ export async function loadIssues(options) {
     if (myVersion !== loadVersion) return;          // 有更新的请求在途，丢弃本次结果
     state.allIssues = result.data.filter((item) => !item.pull_request);
     state.truncated = !!result.truncated;
+    state.stale = !!result.stale;
+    state.cachedAt = result.cachedAt || 0;
+    state.staleMinutes = result.minutes || 0;
     updateStats(state.allIssues);
     renderIssues();
     checkDuplicate();
   } catch (err) {
     if (myVersion !== loadVersion) return;
     console.error('加载 Issues 失败:', err);
+    state.stale = false;
     renderIssuesError(err);
     $('#issueCount').textContent = '?';
   } finally {
@@ -183,10 +202,12 @@ export function renderIssues() {
   // 同步 Tab 徽标（用总数，不受筛选影响）
   setIssueCount(state.allIssues.length);
 
-  const note = truncateNoteHtml();
+  const note = staleNoteHtml() + truncateNoteHtml();
 
   if (list.length === 0) {
-    if (state.allIssues.length === 0) {
+    if (state.allIssues.length === 0 && state.stale) {
+      container.innerHTML = note + '<div class="issues-no-match">🕒 离线缓存里也没有报告，恢复后点「刷新」即可。</div>';
+    } else if (state.allIssues.length === 0) {
       container.innerHTML = note + '<div class="issues-empty">✨ 还没有人提交过 Bug，快来当第一个吧！</div>';
     } else if (quick === 'urgent') {
       container.innerHTML = note + '<div class="issues-no-match">✅ 当前没有「严重 / 致命」级别的未处理报告。</div>';
@@ -225,6 +246,14 @@ export function renderIssues() {
   }).join('');
 
   container.innerHTML = note + '<ul class="issues-list">' + html + '</ul>';
+}
+
+/* 兜底提示里的「重试」：强制刷新，跳过限流冷却。用委托实现，避免每次重渲染都要重新绑定 */
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', (e) => {
+    if (!e.target || e.target.id !== 'staleRetryBtn') return;
+    loadIssues({ force: true });
+  });
 }
 
 /* ---------- 重复检测 ---------- */

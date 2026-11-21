@@ -19,4 +19,10 @@ export const SUBMIT_COOLDOWN_MS = 3 * 60 * 1000;
 export const ISSUES_CACHE_KEY = 'wechat_twu_issues_cache';
 export const ISSUES_ETAG_KEY = 'wechat_twu_issues_etag';
 export const COMMENTS_CACHE_PREFIX = 'wechat_twu_comments_';
-export const CACHE_TTL = 5 * 60 * 1000;
+export const RATE_LIMIT_KEY = 'wechat_twu_rate_limit';
+
+/* 缓存有效期：15 分钟内不重新请求，省下 GitHub 的每小时 60 次额度 */
+export const CACHE_TTL = 15 * 60 * 1000;
+
+/* 限流/断网时的兜底上限：一天内的旧数据仍可展示，只是标注"可能不是最新" */
+export const STALE_MAX_AGE = 24 * 60 * 60 * 1000;
