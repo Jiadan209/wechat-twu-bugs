@@ -178,20 +178,26 @@ function bindEvents() {
 
   $('#searchInput').addEventListener('input', debounce(() => issues.renderIssues(), 250));
 
-  $('#stateFilter').addEventListener('change', () => {
-    $('#searchInput').value = '';
-    issues.renderIssues();
-  });
-
   $('#sortFilter').addEventListener('change', () => issues.renderIssues());
+
+  /* ---- 快捷筛选芯片：点一下切换筛选条件 ---- */
+  $('#quickChips').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    issues.setQuickFilter(chip.dataset.chip);
+  });
 
   /* ---- 表单输入：统一一个监听器 ---- */
   const COUNTER_CONFIG = {
     bugTitle: ['titleCounter', 80],
     bugDescription: ['descCounter', 1000],
-    steps: ['stepsCounter', 600]
+    steps: ['stepsCounter', 600],
+    screenshot: ['screenshotCounter', 2000]
   };
-  const FORM_FIELDS = ['nickname', 'email', 'bugTitle', 'bugType', 'severity', 'bugDescription', 'steps'];
+  const FORM_FIELDS = [
+    'nickname', 'email', 'bugTitle', 'bugType', 'env',
+    'bugDescription', 'steps', 'screenshot'
+  ];
 
   FORM_FIELDS.forEach((id) => {
     const el = document.getElementById(id);
@@ -207,6 +213,17 @@ function bindEvents() {
     el.addEventListener('input', handleInput);
     el.addEventListener('change', handleInput);
   });
+
+  /* ---- 严重程度是单选组，单独监听 ---- */
+  Array.prototype.forEach.call(
+    document.querySelectorAll('input[name="severity"]'),
+    (radio) => {
+      radio.addEventListener('change', () => {
+        $('#draftNotice').classList.remove('active');
+        form.saveDraft();
+      });
+    }
+  );
 
   $('#restoreDraftBtn').addEventListener('click', restoreDraftFromStorage);
   $('#discardDraftBtn').addEventListener('click', discardDraftFromStorage);
