@@ -1,6 +1,7 @@
 /* 入口：初始化、事件绑定、提交编排 */
 import { $, debounce } from './utils.js';
 import { isConfigValid } from './api.js';
+import { initTabs } from './tab.js';
 import * as form from './form.js';
 import * as issues from './issues.js';
 import * as modal from './modal.js';
@@ -61,9 +62,9 @@ function submitToGitHub() {
   submitBtn.innerHTML = '<span aria-hidden="true">⏳</span> 正在跳转…';
 
   /*
-   * 关键修复：不能用 window.open(url, '_blank', 'noopener,...')
-   * —— 带 noopener 特性时，规范要求返回 null，会导致永远检测为"被拦截"。
-   * 这里改为不带 noopener，拿到引用后立即把 opener 置 null（同步执行，安全）。
+   * 不能用 window.open(url, '_blank', 'noopener,...')：
+   * 带 noopener 特性时规范要求返回 null，会被误判为"被拦截"。
+   * 这里拿到引用后立即把 opener 置 null。
    */
   let opened = null;
   try {
@@ -76,7 +77,7 @@ function submitToGitHub() {
   }
 
   if (!opened) {
-    // 真正被拦截 —— 不清空按钮状态，让用户可以立即点手动链接
+    // 真正被拦截 —— 恢复按钮，让用户立即点手动链接
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalText;
     container.innerHTML =
@@ -90,7 +91,7 @@ function submitToGitHub() {
     return;
   }
 
-  // 只有确认打开了新窗口才记录提交时间，避免"被拦截也算提交"
+  // 只有确认打开了新窗口才记录提交时间
   form.recordSubmitTime();
 
   container.innerHTML =
@@ -115,7 +116,7 @@ function submitToGitHub() {
     if (settled) return;
     settled = true;
     window.removeEventListener('focus', onFocusBack);
-    // 延迟 3 秒：给用户一个从新窗口切回的缓冲；返回即视为已提交，清空草稿并刷新列表
+    // 延迟 3 秒：给用户从新窗口切回的缓冲；返回即视为已提交
     setTimeout(() => {
       restoreButton();
       form.discardDraft();
@@ -125,7 +126,7 @@ function submitToGitHub() {
 
   window.addEventListener('focus', onFocusBack);
 
-  // 30 秒兜底：用户长时间不回来，仅恢复按钮，不清草稿（可能只是去浏览了别的 Issue）
+  // 30 秒兜底：仅恢复按钮，不清草稿
   setTimeout(() => {
     if (settled) return;
     settled = true;
@@ -184,7 +185,7 @@ function bindEvents() {
 
   $('#sortFilter').addEventListener('change', () => issues.renderIssues());
 
-  /* ---- 表单输入：统一一个监听器，避免同一元素挂多个 input 处理器 ---- */
+  /* ---- 表单输入：统一一个监听器 ---- */
   const COUNTER_CONFIG = {
     bugTitle: ['titleCounter', 80],
     bugDescription: ['descCounter', 1000],
@@ -246,11 +247,7 @@ function bindEvents() {
     if (e.key === 'Tab') modal.trapFocus(e);
   });
 
-  /*
-   * 清理页面隐藏时的定时器；不再额外 saveDraft。
-   * 原因：input/change 已经实时落盘；若 submit 后的 focus 已 discardDraft，
-   * 这里的 saveDraft 会把刚清掉的草稿又写回去，与"已提交"的语义冲突。
-   */
+  /* 页面隐藏时只清定时器；不写草稿（避免覆盖 discardDraft 的结果） */
   window.addEventListener('pagehide', () => {
     clearInterval(rateLimitTimer);
   });
@@ -259,6 +256,7 @@ function bindEvents() {
 /* ---------- 初始化 ---------- */
 function init() {
   bindEvents();
+  initTabs();
   form.updateAllCounters();
 
   const draft = form.loadDraftFromStorage();
