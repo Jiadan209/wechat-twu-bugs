@@ -7,6 +7,15 @@ import { setIssueCount } from './tab.js';
 let refreshLabelTimer = null;
 let loadVersion = 0;
 
+const SEVERITY_ORDER = ['轻微', '一般', '严重', '致命'];
+
+/* 从 Issue 正文里解析出「严重程度」，旧数据没有这一段就返回空串 */
+export function parseSeverity(body) {
+  if (!body) return '';
+  const m = String(body).match(/\*\*严重程度\*\*\s*[：:]\s*(轻微|一般|严重|致命)/);
+  return m ? m[1] : '';
+}
+
 /* ---------- 骨架屏 / 错误 ---------- */
 function renderSkeleton(container) {
   container.innerHTML =
@@ -53,6 +62,21 @@ function scheduleRefreshLabel() {
   };
   paint();
   refreshLabelTimer = setInterval(paint, 10000);
+}
+
+/* ---------- 快捷筛选 ---------- */
+export function setQuickFilter(name) {
+  const allowed = ['all', 'open', 'urgent', 'closed'];
+  state.quick = allowed.indexOf(name) !== -1 ? name : 'all';
+
+  const chips = document.querySelectorAll('#quickChips .chip');
+  Array.prototype.forEach.call(chips, (chip) => {
+    const active = chip.dataset.chip === state.quick;
+    chip.classList.toggle('active', active);
+    chip.setAttribute('aria-pressed', String(active));
+  });
+
+  renderIssues();
 }
 
 /* ---------- 加载入口 ---------- */
@@ -130,12 +154,21 @@ export function renderIssues() {
   const container = $('#issuesContainer');
   const countBadge = $('#issueCount');
   const keyword = ($('#searchInput').value || '').trim().toLowerCase();
-  const stateFilter = $('#stateFilter').value;
   const sortKey = $('#sortFilter').value;
+  const quick = state.quick || 'all';
 
   let list = state.allIssues.slice();
 
-  if (stateFilter !== 'all') list = list.filter((i) => i.state === stateFilter);
+  if (quick === 'open') list = list.filter((i) => i.state === 'open');
+  else if (quick === 'closed') list = list.filter((i) => i.state === 'closed');
+  else if (quick === 'urgent') {
+    /* 「紧急」= 未解决 且 严重程度为 严重/致命 */
+    list = list.filter((i) => {
+      if (i.state !== 'open') return false;
+      const sev = parseSeverity(i.body);
+      return sev === '严重' || sev === '致命';
+    });
+  }
 
   if (keyword) {
     list = list.filter((i) =>
@@ -155,6 +188,8 @@ export function renderIssues() {
   if (list.length === 0) {
     if (state.allIssues.length === 0) {
       container.innerHTML = note + '<div class="issues-empty">✨ 还没有人提交过 Bug，快来当第一个吧！</div>';
+    } else if (quick === 'urgent') {
+      container.innerHTML = note + '<div class="issues-no-match">✅ 当前没有「严重 / 致命」级别的未处理报告。</div>';
     } else {
       container.innerHTML = note + '<div class="issues-no-match">🔍 没有匹配的报告，试试换个关键词或筛选条件。</div>';
     }
@@ -163,6 +198,7 @@ export function renderIssues() {
 
   const html = list.map((issue) => {
     const isOpen = issue.state === 'open';
+    const sev = parseSeverity(issue.body);
     const date = new Date(issue.created_at).toLocaleDateString('zh-CN');
     const commentMeta = issue.comments > 0
       ? '<span><span aria-hidden="true">💬</span> ' + issue.comments + '</span>'
@@ -170,14 +206,17 @@ export function renderIssues() {
     const statusText = isOpen ? '未解决' : '已解决';
 
     return '' +
-      '<li class="issue-item ' + (isOpen ? '' : 'closed') + '" role="button" tabindex="0"' +
+      '<li class="issue-item ' + (isOpen ? '' : 'closed') + (sev ? ' sev-' + sev : '') + '"' +
+      ' role="button" tabindex="0"' +
       ' data-issue="' + issue.number + '"' +
-      ' aria-label="#' + issue.number + ' ' + escapeHtml(issue.title) + '（' + statusText + '）">' +
+      ' aria-label="#' + issue.number + ' ' + escapeHtml(issue.title) + '（' + statusText +
+        (sev ? '，严重程度 ' + sev : '') + '）">' +
         '<span class="issue-status" aria-hidden="true">' + (isOpen ? '🟢' : '⚪') + '</span>' +
         '<div class="issue-info">' +
           '<div class="issue-title">' + escapeHtml(issue.title) + '</div>' +
           '<div class="issue-meta">' +
             '<span class="issue-number">#' + issue.number + '</span>' +
+            (sev ? '<span class="sev-tag sev-' + sev + '">' + sev + '</span>' : '') +
             '<span><span aria-hidden="true">📅</span> ' + date + '</span>' +
             commentMeta +
           '</div>' +
