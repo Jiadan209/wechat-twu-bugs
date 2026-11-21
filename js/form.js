@@ -79,6 +79,12 @@ export function updateAllCounters() {
 }
 
 /* ---------- 内联错误 ---------- */
+/* 这些输入框除了错误信息外，本来就带一段常态说明，清错误时要还原回去 */
+const DEFAULT_DESCRIBEDBY = {
+  bugTitle: 'titleCounter',
+  email: 'emailPrivacyHint'
+};
+
 export function showFieldError(el, message) {
   if (!el) return;
   clearFieldError(el);
@@ -97,11 +103,9 @@ export function clearFieldError(el) {
   if (!el || !el.id) return;
   el.classList.remove('invalid');
   el.removeAttribute('aria-invalid');
-  if (el.id === 'bugTitle') {
-    el.setAttribute('aria-describedby', 'titleCounter');
-  } else {
-    el.removeAttribute('aria-describedby');
-  }
+  const describedBy = DEFAULT_DESCRIBEDBY[el.id];
+  if (describedBy) el.setAttribute('aria-describedby', describedBy);
+  else el.removeAttribute('aria-describedby');
   const err = document.getElementById(el.id + 'Error');
   if (err) err.remove();
 }

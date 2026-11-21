@@ -1,0 +1,85 @@
+name: Bug 报告
+description: 提交微信twu 的 Bug（也可以直接在站点上填表提交）
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！描述得越具体，定位越快。
+
+        > ⚠️ 本仓库是**公开**仓库，你在这里填写的所有内容都会公开可见，
+        > 请勿填写邮箱、身份证号等个人敏感信息。
+
+  - type: input
+    id: nickname
+    attributes:
+      label: 你的昵称
+      description: 方便在回复时称呼你
+      placeholder: 例如：小明
+    validations:
+      required: true
+
+  - type: dropdown
+    id: bugtype
+    attributes:
+      label: 问题类型
+      options:
+        - 界面显示
+        - 功能异常
+        - 闪退/卡死
+        - 性能问题
+        - 其他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 严重程度
+      options:
+        - 轻微 — 不影响使用
+        - 一般 — 有点烦人
+        - 严重 — 无法正常聊天
+        - 致命 — 完全崩溃
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 详细描述
+      description: 什么时候发生的？你点击了什么？期望结果是什么？
+      placeholder: 例如：发送消息后对方没有收到，刷新页面仍然显示已发送。
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开微信twu聊天界面
+        2. 在输入框输入文字
+        3. 快速点击发送三次
+    validations:
+      required: false
+
+  - type: input
+    id: env
+    attributes:
+      label: 运行环境
+      description: 浏览器 / 系统 / 是否 TurboWarp 网页版
+      placeholder: 例如：TurboWarp 网页版 / Chrome 131 / Windows 11
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已经搜索过已有报告，确认没有重复
+        - label: 我知道这个仓库是公开的，填写的内容会被所有人看到
+    validations:
+      required: true

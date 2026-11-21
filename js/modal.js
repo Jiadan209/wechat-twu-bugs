@@ -4,11 +4,57 @@ import { state } from './store.js';
 import { renderMarkdown } from './markdown.js';
 import { fetchIssueDetail, fetchComments } from './api.js';
 
+/* ---------- 滚动锁 ----------
+ * 只用 overflow:hidden 在 iOS Safari 上常常锁不住，
+ * 这里改成 position:fixed + 记录滚动位置，关闭后精确还原。
+ */
+let savedScrollY = 0;
+let scrollLocked = false;
+
+function lockScroll() {
+  if (scrollLocked) return;
+  savedScrollY = window.scrollY || window.pageYOffset || 0;
+  const body = document.body;
+  body.style.position = 'fixed';
+  body.style.top = '-' + savedScrollY + 'px';
+  body.style.left = '0';
+  body.style.right = '0';
+  body.style.width = '100%';
+  body.style.overflow = 'hidden';
+  /* 补偿消失的滚动条宽度，避免弹窗打开时页面横向抖动 */
+  const gap = window.innerWidth - document.documentElement.clientWidth;
+  if (gap > 0) body.style.paddingRight = gap + 'px';
+  scrollLocked = true;
+}
+
+function unlockScroll() {
+  if (!scrollLocked) return;
+  const body = document.body;
+  body.style.position = '';
+  body.style.top = '';
+  body.style.left = '';
+  body.style.right = '';
+  body.style.width = '';
+  body.style.overflow = '';
+  body.style.paddingRight = '';
+  scrollLocked = false;
+  window.scrollTo(0, savedScrollY);
+}
+
+/* 弹窗打开时把主内容设为 inert：读屏与 Tab 不会再穿到背景 */
+function setBackgroundInert(on) {
+  const card = $('.bug-report-card');
+  if (!card) return;
+  if (on) card.setAttribute('inert', '');
+  else card.removeAttribute('inert');
+}
+
 export function openModal() {
   const modal = $('#issueModal');
   state.lastFocusedElement = document.activeElement;
   modal.classList.add('active');
-  document.body.style.overflow = 'hidden';
+  lockScroll();
+  setBackgroundInert(true);
   const closeBtn = $('#modalCloseBtn');
   if (closeBtn) closeBtn.focus();
 }
@@ -17,7 +63,8 @@ export function closeModal() {
   const modal = $('#issueModal');
   if (!modal.classList.contains('active')) return;
   modal.classList.remove('active');
-  document.body.style.overflow = '';
+  setBackgroundInert(false);
+  unlockScroll();
   state.currentModalNumber = null;
   if (state.lastFocusedElement && typeof state.lastFocusedElement.focus === 'function') {
     state.lastFocusedElement.focus();

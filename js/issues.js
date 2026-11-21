@@ -1,4 +1,4 @@
-import { GITHUB_CONFIG } from './config.js';
+import { GITHUB_CONFIG, DUPLICATE_THRESHOLD } from './config.js';
 import { $, escapeHtml, debounce } from './utils.js';
 import { state } from './store.js';
 import { fetchIssues, isConfigValid, cacheRemainMs } from './api.js';
@@ -11,8 +11,7 @@ let loadVersion = 0;
 function renderSkeleton(container) {
   container.innerHTML =
     '<div class="skeleton-list" aria-hidden="true">' +
-    new Array(4).join('<div class="skeleton-row"></div>') +
-    '<div class="skeleton-row"></div>' +
+    new Array(5).join('<div class="skeleton-row"></div>') +
     '</div>';
 }
 
@@ -77,6 +76,7 @@ export async function loadIssues(options) {
     const result = await fetchIssues({ force });
     if (myVersion !== loadVersion) return;          // 有更新的请求在途，丢弃本次结果
     state.allIssues = result.data.filter((item) => !item.pull_request);
+    state.truncated = !!result.truncated;
     updateStats(state.allIssues);
     renderIssues();
     checkDuplicate();
@@ -116,6 +116,16 @@ const SORTERS = {
   updated: (a, b) => new Date(b.updated_at) - new Date(a.updated_at)
 };
 
+/* 列表被截断时的提示：说清只显示了多少条，以及去哪看全部 */
+function truncateNoteHtml() {
+  if (!state.truncated) return '';
+  const ghUrl = 'https://github.com/' + GITHUB_CONFIG.owner + '/' + GITHUB_CONFIG.repo + '/issues?q=is%3Aissue';
+  return '<div class="truncate-note">' +
+    'ℹ️ 仅加载最近 ' + state.allIssues.length + ' 条报告，更早的请 ' +
+    '<a class="err-link" href="' + ghUrl + '" target="_blank" rel="noopener noreferrer">前往 GitHub 查看</a>。' +
+    '</div>';
+}
+
 export function renderIssues() {
   const container = $('#issuesContainer');
   const countBadge = $('#issueCount');
@@ -140,11 +150,13 @@ export function renderIssues() {
   // 同步 Tab 徽标（用总数，不受筛选影响）
   setIssueCount(state.allIssues.length);
 
+  const note = truncateNoteHtml();
+
   if (list.length === 0) {
     if (state.allIssues.length === 0) {
-      container.innerHTML = '<div class="issues-empty">✨ 还没有人提交过 Bug，快来当第一个吧！</div>';
+      container.innerHTML = note + '<div class="issues-empty">✨ 还没有人提交过 Bug，快来当第一个吧！</div>';
     } else {
-      container.innerHTML = '<div class="issues-no-match">🔍 没有匹配的报告，试试换个关键词或筛选条件。</div>';
+      container.innerHTML = note + '<div class="issues-no-match">🔍 没有匹配的报告，试试换个关键词或筛选条件。</div>';
     }
     return;
   }
@@ -173,10 +185,16 @@ export function renderIssues() {
       '</li>';
   }).join('');
 
-  container.innerHTML = '<ul class="issues-list">' + html + '</ul>';
+  container.innerHTML = note + '<ul class="issues-list">' + html + '</ul>';
 }
 
 /* ---------- 重复检测 ---------- */
+/* 这些词几乎每条 Bug 标题里都有，参与匹配只会制造误报 */
+const STOPWORDS = [
+  'bug', '错误', '问题', '异常', '无法', '不能', '不了', '失败', '显示', '出现',
+  '一直', '突然', '然后', '就是', '这个', '那个', '没有', '怎么', '为什么', '求助'
+];
+
 export function checkDuplicate() {
   const hint = $('#duplicateHint');
   const raw = $('#bugTitle').value.trim().toLowerCase();
@@ -188,19 +206,21 @@ export function checkDuplicate() {
 
   const parts = raw
     .split(/[\s，,。.、\/\\|;；:：!！?？()（）\[\]【】"“”'‘’]+/)
-    .filter((w) => w.length >= 2);
-  const terms = parts.length ? parts : [raw];
+    .filter((w) => w.length >= 2 && STOPWORDS.indexOf(w) === -1);
+  const terms = parts.length ? parts : [];
+
+  // 全是停用词（例如只写了"闪退问题"）时不做匹配，避免把整个列表都当成相似
+  if (!terms.length) return;
 
   const scored = [];
   state.allIssues.forEach((issue) => {
     const title = (issue.title || '').toLowerCase();
-    const body = (issue.body || '').toLowerCase();
     let hits = 0;
     terms.forEach((t) => {
-      if (title.indexOf(t) !== -1 || body.indexOf(t) !== -1) hits++;
+      if (title.indexOf(t) !== -1) hits++;
     });
     const score = hits / terms.length;
-    if (score >= 0.5) scored.push({ issue, score });
+    if (score >= DUPLICATE_THRESHOLD) scored.push({ issue: issue, score: score });
   });
 
   if (!scored.length) return;

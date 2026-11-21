@@ -1,0 +1,31 @@
+name: 自动给新 Issue 打标签
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      # 站点提交走的是 GitHub 的空白新建页，URL 里预填的 labels 对无权限访客不生效，
+      # 所以这里在 Issue opened 时补打一次。
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = ['bug', '微信twu'];
+            for (const label of labels) {
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  labels: [label]
+                });
+              } catch (e) {
+                core.info('跳过标签 ' + label + '：' + e.message);
+              }
+            }
