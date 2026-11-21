@@ -1,5 +1,5 @@
 import { GITHUB_CONFIG, DUPLICATE_THRESHOLD } from './config.js';
-import { $, escapeHtml, debounce } from './utils.js';
+import { $, escapeHtml, debounce, icon } from './utils.js';
 import { state } from './store.js';
 import { fetchIssues, isConfigValid, cacheRemainMs } from './api.js';
 import { setIssueCount } from './tab.js';
@@ -8,12 +8,23 @@ let refreshLabelTimer = null;
 let loadVersion = 0;
 
 const SEVERITY_ORDER = ['轻微', '一般', '严重', '致命'];
+const TYPE_ORDER = ['界面显示', '功能异常', '闪退卡死', '性能问题', '其他'];
 
 /* 从 Issue 正文里解析出「严重程度」，旧数据没有这一段就返回空串 */
 export function parseSeverity(body) {
   if (!body) return '';
   const m = String(body).match(/\*\*严重程度\*\*\s*[：:]\s*(轻微|一般|严重|致命)/);
   return m ? m[1] : '';
+}
+
+/* 从正文里解析「问题类型」：兼容旧文案与手写的近似值 */
+export function parseType(body) {
+  if (!body) return '';
+  const m = String(body).match(/\*\*问题类型\*\*\s*[：:]\s*([^\n]+)/);
+  if (!m) return '';
+  const raw = m[1].trim();
+  if (raw.indexOf('闪退') !== -1) return '闪退卡死';
+  return TYPE_ORDER.indexOf(raw) !== -1 ? raw : '其他';
 }
 
 /* ---------- 骨架屏 / 错误 ---------- */
@@ -70,9 +81,7 @@ function scheduleRefreshLabel() {
     if (!btn || btn.disabled) return;
     const remain = cacheRemainMs();
     const minutes = remain > 0 ? Math.ceil(remain / 60000) : 0;
-    btn.innerHTML = minutes > 0
-      ? '<span aria-hidden="true">🔄</span> 刷新 (' + minutes + ')'
-      : '<span aria-hidden="true">🔄</span> 刷新';
+    btn.innerHTML = icon('refresh') + (minutes > 0 ? ' 刷新 (' + minutes + ')' : ' 刷新');
     if (minutes <= 0) clearInterval(refreshLabelTimer);
   };
   paint();
@@ -107,7 +116,7 @@ export async function loadIssues(options) {
   }
 
   btn.disabled = true;
-  btn.innerHTML = '<span aria-hidden="true">⏳</span> 加载中';
+  btn.innerHTML = icon('refresh') + ' 加载中';
   container.setAttribute('aria-busy', 'true');
   renderSkeleton(container);
 
@@ -149,6 +158,36 @@ function updateStats(list) {
   $('#statOpen').textContent = open;
   $('#statClosed').textContent = closed;
   $('#statWeek').textContent = week;
+
+  renderTypeBreakdown(list);
+}
+
+/* 「问题类型分布」横条：比四个数字更能说明问题集中在哪 */
+function renderTypeBreakdown(list) {
+  const box = $('#typeBreakdown');
+  if (!box) return;
+
+  const counts = {};
+  TYPE_ORDER.forEach((t) => { counts[t] = 0; });
+  list.forEach((issue) => {
+    const t = parseType(issue.body);
+    if (t) counts[t] = (counts[t] || 0) + 1;
+  });
+
+  const max = Math.max.apply(null, TYPE_ORDER.map((t) => counts[t]).concat([1]));
+  const total = list.length;
+
+  box.innerHTML =
+    '<div class="type-title">问题类型分布</div>' +
+    TYPE_ORDER.map((t) => {
+      const n = counts[t] || 0;
+      const width = total ? Math.round((n / max) * 100) : 0;
+      return '<div class="type-row">' +
+        '<span class="type-name">' + t + '</span>' +
+        '<span class="type-track"><span class="type-bar" style="width:' + width + '%"></span></span>' +
+        '<span class="type-count">' + n + '</span>' +
+        '</div>';
+    }).join('');
 }
 
 /* ---------- 列表渲染 ---------- */

@@ -2,7 +2,7 @@ name: 自动给新 Issue 打标签
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
 
 permissions:
   issues: write
@@ -11,20 +11,44 @@ jobs:
   label:
     runs-on: ubuntu-latest
     steps:
-      # 站点提交走的是 GitHub 的空白新建页，URL 里预填的 labels 对无权限访客不生效，
-      # 所以这里在 Issue opened 时补打一次。
+      # 站点提交走的是 GitHub 的新建页，URL 里预填的 labels 对无权限访客不生效，
+      # 所以这里在 Issue 打开/编辑时补打标签，并按正文里的「严重程度」打一个带颜色的标签。
       - uses: actions/github-script@v7
         with:
           script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+            const body = (context.payload.issue && context.payload.issue.body) || '';
+
+            const SEVERITY = {
+              '轻微': { name: 'sev:轻微', color: '0e8a16' },
+              '一般': { name: 'sev:一般', color: 'fbca04' },
+              '严重': { name: 'sev:严重', color: 'd93f0b' },
+              '致命': { name: 'sev:致命', color: 'b60205' }
+            };
+
             const labels = ['bug', '微信twu'];
+
+            const m = body.match(/\*\*严重程度\*\*\s*[：:]\s*(轻微|一般|严重|致命)/);
+            if (m) {
+              const sev = SEVERITY[m[1]];
+              labels.push(sev.name);
+              // 标签不存在时先创建，避免 addLabels 因为缺标签而失败
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: sev.name });
+              } catch (e) {
+                try {
+                  await github.rest.issues.createLabel({ owner, repo, name: sev.name, color: sev.color });
+                } catch (err) {
+                  core.info('创建标签失败 ' + sev.name + '：' + err.message);
+                }
+              }
+            }
+
             for (const label of labels) {
               try {
-                await github.rest.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.issue.number,
-                  labels: [label]
-                });
+                await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [label] });
               } catch (e) {
                 core.info('跳过标签 ' + label + '：' + e.message);
               }

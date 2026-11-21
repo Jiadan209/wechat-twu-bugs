@@ -1,7 +1,7 @@
 /* 入口：初始化、事件绑定、提交编排 */
 import { $, debounce } from './utils.js';
 import { isConfigValid } from './api.js';
-import { initTabs } from './tab.js';
+import { initTabs, activateTab } from './tab.js';
 import * as form from './form.js';
 import * as issues from './issues.js';
 import * as modal from './modal.js';
@@ -254,6 +254,26 @@ function bindEvents() {
     if (e.target.id === 'issueModal') modal.closeModal();
   });
 
+  /* ---- 复制单条链接 / 复制 Markdown ---- */
+  $('#modalCopyLinkBtn').addEventListener('click', (e) => {
+    modal.copyLinkWithFeedback(e.currentTarget);
+  });
+  $('#modalCopyMdBtn').addEventListener('click', (e) => {
+    modal.copyMarkdownWithFeedback(e.currentTarget);
+  });
+
+  /* ---- 移动端悬浮「去填写」按钮 ---- */
+  $('#fabSubmit').addEventListener('click', () => {
+    activateTab('form', { scroll: true });
+    const cardBody = $('.card-body');
+    if (cardBody) cardBody.scrollTo({ top: 0, behavior: 'smooth' });
+    const nickname = $('#nickname');
+    if (nickname) {
+      nickname.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      nickname.focus({ preventScroll: true });
+    }
+  });
+
   document.addEventListener('keydown', (e) => {
     const m = $('#issueModal');
     if (!m.classList.contains('active')) return;
@@ -270,6 +290,16 @@ function bindEvents() {
   });
 }
 
+/* ---------- 深链：?issue=5 直接打开对应报告 ---------- */
+function openFromUrl() {
+  let n = 0;
+  try {
+    n = Number(new URLSearchParams(window.location.search).get('issue'));
+  } catch (e) { return; }
+  if (!Number.isInteger(n) || n <= 0) return;
+  modal.openIssueModal(n);
+}
+
 /* ---------- 初始化 ---------- */
 function init() {
   bindEvents();
@@ -282,6 +312,8 @@ function init() {
   }
 
   issues.loadIssues();
+
+  openFromUrl();
 }
 
 if (document.readyState === 'loading') {

@@ -206,6 +206,101 @@
       overflow: hidden;
     }
 
+    /* 6. 内联 SVG 图标：统一描边，跨平台一致 */
+    .svg-sprite { display: none; }
+    .icon-svg {
+      width: 1em;
+      height: 1em;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vertical-align: -0.14em;
+      flex-shrink: 0;
+    }
+    .icon-svg.lg { width: 1.15em; height: 1.15em; }
+
+    /* 7. 问题类型分布 */
+    .type-breakdown {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg-soft);
+    }
+    .type-title {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+    }
+    .type-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.74rem;
+      color: var(--text-sub);
+      line-height: 2;
+    }
+    .type-name { width: 5.2em; flex-shrink: 0; }
+    .type-track {
+      flex: 1;
+      height: 7px;
+      border-radius: 4px;
+      background: var(--border);
+      overflow: hidden;
+    }
+    .type-bar {
+      display: block;
+      height: 100%;
+      border-radius: 4px;
+      background: var(--green);
+      transition: width 0.3s ease;
+    }
+    .type-count {
+      width: 2em;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+    }
+
+    /* 8. 移动端悬浮「去填写」按钮 */
+    .fab {
+      position: fixed;
+      right: 16px;
+      bottom: 18px;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 11px 16px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--green);
+      border: 0;
+      border-radius: 999px;
+      box-shadow: 0 8px 20px rgba(7, 193, 96, 0.35);
+      cursor: pointer;
+    }
+    .fab:active { transform: translateY(1px); }
+
+    /* 9. 次要按钮（复制链接 / 复制 Markdown） */
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      color: var(--text-sub);
+    }
+    .btn-ghost:hover { color: var(--text-main); border-color: var(--green); }
+
+    @media (max-width: 960px) {
+      .fab { display: inline-flex; }
+      /* 已经在表单视图时不需要这个按钮 */
+      body[data-active-tab="form"] .fab { display: none; }
+    }
+
     @media (prefers-color-scheme: dark) {
       .truncate-note { color: #9ca3af; background: #1f2430; }
       .truncate-note.stale-note { color: #fcd34d; background: rgba(245, 158, 11, 0.14); }
@@ -214,6 +309,15 @@
   </style>
 </head>
 <body data-active-tab="form">
+  <!-- 内联 SVG 图标雪碧图：JS 里用 icon('refresh') 之类的调用引用 -->
+  <svg class="svg-sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20l1-4 11-11 3 3-11 11-4 1z"/><path d="M14 6l3 3"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.6"/><path d="M20 4v4h-4"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 8 6 8-16-8z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="3" width="11" height="14" rx="2"/><path d="M15 20H6a2 2 0 0 1-2-2V7"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l2.3-2.3a4 4 0 0 0-5.7-5.7"/><path d="M14 10a4 4 0 1 0-5.7 0L6 12.3a4 4 0 0 0 5.7 5.7"/></symbol>
+  </svg>
   <noscript>
     <div style="padding: 24px; margin: 24px; text-align: center; background: #fee2e2; color: #991b1b; border-radius: 10px; font-family: -apple-system, sans-serif;">
       ⚠️ 本页面需要启用 JavaScript 才能正常使用。
@@ -246,12 +350,12 @@
         <button type="button" class="tab-btn active" id="tabForm"
                 role="tab" data-tab="form"
                 aria-selected="true" aria-controls="panelForm" tabindex="0">
-          <span aria-hidden="true">✏️</span> 提交报告
+          <svg class="icon-svg" aria-hidden="true"><use href="#i-edit"></use></svg> 提交报告
         </button>
         <button type="button" class="tab-btn" id="tabIssues"
                 role="tab" data-tab="issues"
                 aria-selected="false" aria-controls="panelIssues" tabindex="-1">
-          <span aria-hidden="true">📋</span> 已有报告
+          <svg class="icon-svg" aria-hidden="true"><use href="#i-list"></use></svg> 已有报告
           <span class="tab-count" id="tabIssueCount"></span>
         </button>
       </div>
@@ -260,7 +364,7 @@
         <!-- 左栏 -->
         <div class="left-column" id="panelForm" role="tabpanel" aria-labelledby="tabForm">
           <div class="col-title">
-            <span class="icon" aria-hidden="true">✏️</span>
+            <span class="icon" aria-hidden="true"><svg class="icon-svg lg"><use href="#i-edit"></use></svg></span>
             <span>提交新的 Bug 报告</span>
           </div>
 
@@ -315,7 +419,7 @@
                 <select class="form-control" id="bugType">
                   <option value="界面显示" selected>界面显示</option>
                   <option value="功能异常">功能异常</option>
-                  <option value="闪退卡死">闪退/卡死</option>
+                  <option value="闪退卡死">闪退卡死</option>
                   <option value="性能问题">性能问题</option>
                   <option value="其他">其他</option>
                 </select>
@@ -392,7 +496,7 @@
             <div class="action-buttons">
               <button type="button" class="btn" id="clearBtn">清空</button>
               <button type="submit" class="btn btn-primary" id="submitBtn">
-                <span aria-hidden="true">🚀</span> 提交到 GitHub
+                <svg class="icon-svg" aria-hidden="true"><use href="#i-send"></use></svg> 提交到 GitHub
               </button>
             </div>
           </form>
@@ -403,7 +507,7 @@
         <!-- 右栏 -->
         <div class="right-column" id="panelIssues" role="tabpanel" aria-labelledby="tabIssues">
           <div class="col-title">
-            <span class="icon blue" aria-hidden="true">📋</span>
+            <span class="icon blue" aria-hidden="true"><svg class="icon-svg lg"><use href="#i-list"></use></svg></span>
             <span>已有 Bug 报告</span>
           </div>
 
@@ -426,6 +530,9 @@
             </div>
           </div>
 
+          <!-- 问题类型分布：由 issues.js 渲染 -->
+          <div class="type-breakdown" id="typeBreakdown" aria-live="polite"></div>
+
           <div class="issues-section">
             <div class="issues-header">
               <h2>
@@ -433,7 +540,7 @@
                 <span class="count-badge" id="issueCount">—</span>
               </h2>
               <button class="refresh-btn" id="refreshBtn" type="button" aria-label="刷新 Bug 列表">
-                <span aria-hidden="true">🔄</span> 刷新
+                <svg class="icon-svg" aria-hidden="true"><use href="#i-refresh"></use></svg> 刷新
               </button>
             </div>
 
@@ -481,11 +588,22 @@
         <div class="modal-comments" id="modalComments"></div>
       </div>
       <div class="modal-footer">
+        <button class="btn btn-ghost" type="button" id="modalCopyLinkBtn">
+          <svg class="icon-svg" aria-hidden="true"><use href="#i-link"></use></svg> 复制链接
+        </button>
+        <button class="btn btn-ghost" type="button" id="modalCopyMdBtn">
+          <svg class="icon-svg" aria-hidden="true"><use href="#i-copy"></use></svg> 复制 Markdown
+        </button>
         <button class="btn" type="button" id="modalFooterCloseBtn">关闭</button>
         <a class="btn btn-primary" id="modalGithubLink" href="#" target="_blank" rel="noopener noreferrer">去 GitHub 查看 →</a>
       </div>
     </div>
   </div>
+
+  <!-- 移动端悬浮：任何位置都能直接回到表单 -->
+  <button class="fab" id="fabSubmit" type="button">
+    <svg class="icon-svg lg" aria-hidden="true"><use href="#i-edit"></use></svg> 去填写
+  </button>
 
   <script type="module" src="js/app.js"></script>
 </body>
