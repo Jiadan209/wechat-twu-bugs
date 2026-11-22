@@ -167,6 +167,14 @@ function renderTypeBreakdown(list) {
   const box = $('#typeBreakdown');
   if (!box) return;
 
+  /* 一条报告都没有时不占版面：留着五条空横条只是噪音 */
+  if (!list.length) {
+    box.hidden = true;
+    box.innerHTML = '';
+    return;
+  }
+  box.hidden = false;
+
   const counts = {};
   TYPE_ORDER.forEach((t) => { counts[t] = 0; });
   list.forEach((issue) => {
