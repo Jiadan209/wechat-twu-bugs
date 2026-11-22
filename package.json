@@ -1,6 +1,6 @@
 {
   "name": "wechat-twu-bugs",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "private": true,
   "type": "module",
   "description": "微信twu 聊天作品的 Bug 汇报站（纯静态 + GitHub Issues）",
