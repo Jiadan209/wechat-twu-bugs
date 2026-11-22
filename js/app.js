@@ -1,5 +1,6 @@
 /* 入口：初始化、事件绑定、提交编排 */
 import { $, debounce } from './utils.js';
+import { state } from './store.js';
 import { isConfigValid } from './api.js';
 import { initTabs, activateTab } from './tab.js';
 import * as form from './form.js';
@@ -93,6 +94,7 @@ function submitToGitHub() {
 
   // 只有确认打开了新窗口才记录提交时间
   form.recordSubmitTime();
+  form.rememberNickname();
 
   container.innerHTML =
     '<div class="toast-message toast-info">' +
@@ -147,6 +149,7 @@ function clearForm() {
 
   form.updateAllCounters();
   form.discardDraft();
+  form.restoreNickname();      // 清空后仍保留上次的昵称，省得重打
   $('#draftNotice').classList.remove('active');
   $('#nickname').focus();
 }
@@ -176,15 +179,22 @@ function bindEvents() {
   $('#clearBtn').addEventListener('click', clearForm);
   $('#refreshBtn').addEventListener('click', () => issues.loadIssues({ force: true }));
 
-  $('#searchInput').addEventListener('input', debounce(() => issues.renderIssues(), 250));
+  $('#searchInput').addEventListener('input', debounce(() => {
+    issues.renderIssues();
+    syncFilterUrl();
+  }, 250));
 
-  $('#sortFilter').addEventListener('change', () => issues.renderIssues());
+  $('#sortFilter').addEventListener('change', () => {
+    issues.renderIssues();
+    syncFilterUrl();
+  });
 
   /* ---- 快捷筛选芯片：点一下切换筛选条件 ---- */
   $('#quickChips').addEventListener('click', (e) => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
     issues.setQuickFilter(chip.dataset.chip);
+    syncFilterUrl();
   });
 
   /* ---- 表单输入：统一一个监听器 ---- */
@@ -300,15 +310,65 @@ function openFromUrl() {
   modal.openIssueModal(n);
 }
 
+/* ---------- 筛选状态进 URL：?chip=urgent&q=关键词&sort=severity ---------- */
+const CHIPS = ['all', 'open', 'urgent', 'closed'];
+const SORTS = ['created', 'severity', 'comments', 'updated'];
+
+function readFiltersFromUrl() {
+  let params;
+  try { params = new URLSearchParams(window.location.search); } catch (e) { return; }
+
+  const sort = params.get('sort');
+  if (SORTS.indexOf(sort) !== -1) $('#sortFilter').value = sort;
+
+  const q = params.get('q');
+  if (q) $('#searchInput').value = q;
+
+  const chip = params.get('chip');
+  issues.setQuickFilter(CHIPS.indexOf(chip) !== -1 ? chip : 'all');
+}
+
+/* 只在这三个键上改 URL，别碰弹窗留下的 ?issue=N */
+function syncFilterUrl() {
+  try {
+    const url = new URL(window.location.href);
+    const chip = state.quick || 'all';
+    const q = ($('#searchInput').value || '').trim();
+    const sort = $('#sortFilter').value;
+
+    if (chip !== 'all') url.searchParams.set('chip', chip); else url.searchParams.delete('chip');
+    if (q) url.searchParams.set('q', q); else url.searchParams.delete('q');
+    if (sort !== 'created') url.searchParams.set('sort', sort); else url.searchParams.delete('sort');
+
+    window.history.replaceState(null, '', url.pathname + (url.search || '') + (url.hash || ''));
+  } catch (e) { /* 隐私模式下可能不可用，忽略 */ }
+}
+
+/* ---------- 页脚版本号：读 version.json ---------- */
+function showVersionBadge() {
+  const badge = $('#versionBadge');
+  if (!badge) return;
+  fetch('version.json', { cache: 'no-store' })
+    .then((res) => (res.ok ? res.json() : null))
+    .then((data) => {
+      if (data && data.version) badge.textContent = 'v' + data.version;
+    })
+    .catch(() => { /* 拿不到就不显示，不影响页面 */ });
+}
+
 /* ---------- 初始化 ---------- */
 function init() {
   bindEvents();
   initTabs();
+  readFiltersFromUrl();
   form.updateAllCounters();
+  showVersionBadge();
 
   const draft = form.loadDraftFromStorage();
   if (form.hasDraftContent(draft)) {
     $('#draftNotice').classList.add('active');
+  } else {
+    form.restoreNickname();
   }
 
   issues.loadIssues();

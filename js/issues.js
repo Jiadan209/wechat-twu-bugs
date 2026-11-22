@@ -1,5 +1,5 @@
 import { GITHUB_CONFIG, DUPLICATE_THRESHOLD } from './config.js';
-import { $, escapeHtml, debounce, icon } from './utils.js';
+import { $, escapeHtml, debounce, icon, copyText } from './utils.js';
 import { state } from './store.js';
 import { fetchIssues, isConfigValid, cacheRemainMs } from './api.js';
 import { setIssueCount } from './tab.js';
@@ -199,8 +199,17 @@ function renderTypeBreakdown(list) {
 }
 
 /* ---------- 列表渲染 ---------- */
+/* 严重程度越大越靠前；正文里没写严重程度的排到最后 */
+function severityRank(issue) {
+  const sev = parseSeverity(issue.body);
+  const idx = SEVERITY_ORDER.indexOf(sev);
+  return idx === -1 ? SEVERITY_ORDER.length : (SEVERITY_ORDER.length - 1 - idx);
+}
+
 const SORTERS = {
   created: (a, b) => new Date(b.created_at) - new Date(a.created_at),
+  severity: (a, b) =>
+    severityRank(a) - severityRank(b) || (new Date(b.created_at) - new Date(a.created_at)),
   comments: (a, b) =>
     (b.comments || 0) - (a.comments || 0) || (new Date(b.created_at) - new Date(a.created_at)),
   updated: (a, b) => new Date(b.updated_at) - new Date(a.updated_at)
@@ -244,7 +253,18 @@ export function renderIssues() {
   }
 
   list.sort(SORTERS[sortKey] || SORTERS.created);
-  countBadge.textContent = list.length;
+
+  /* 有筛选时显示「筛出 / 总数」，避免误以为数据丢了 */
+  const totalCount = state.allIssues.length;
+  if (list.length === totalCount) {
+    countBadge.textContent = totalCount;
+    countBadge.classList.remove('is-filtered');
+    countBadge.removeAttribute('title');
+  } else {
+    countBadge.textContent = list.length + ' / ' + totalCount;
+    countBadge.classList.add('is-filtered');
+    countBadge.title = '共 ' + totalCount + ' 条，当前筛出 ' + list.length + ' 条';
+  }
 
   // 同步 Tab 徽标（用总数，不受筛选影响）
   setIssueCount(state.allIssues.length);
@@ -255,7 +275,12 @@ export function renderIssues() {
     if (state.allIssues.length === 0 && state.stale) {
       container.innerHTML = note + '<div class="issues-no-match">🕒 离线缓存里也没有报告，恢复后点「刷新」即可。</div>';
     } else if (state.allIssues.length === 0) {
-      container.innerHTML = note + '<div class="issues-empty">✨ 还没有人提交过 Bug，快来当第一个吧！</div>';
+      container.innerHTML = note +
+        '<div class="issues-empty">✨ 还没有人提交过 Bug，快来当第一个吧！' +
+        '<div class="empty-actions">' +
+          '<button type="button" class="btn btn-ghost btn-sm" id="copyTemplateBtn">' +
+            icon('copy') + ' 复制描述模板</button>' +
+        '</div></div>';
     } else if (quick === 'urgent') {
       container.innerHTML = note + '<div class="issues-no-match">✅ 当前没有「严重 / 致命」级别的未处理报告。</div>';
     } else {
@@ -300,6 +325,36 @@ if (typeof document !== 'undefined') {
   document.addEventListener('click', (e) => {
     if (!e.target || e.target.id !== 'staleRetryBtn') return;
     loadIssues({ force: true });
+  });
+}
+
+/* ---------- 空状态的「复制描述模板」 ---------- */
+/* 一条报告都没有时，最难的往往是"不知道该怎么描述"；给一段填空骨架降低门槛 */
+const TEMPLATE_TEXT = [
+  '**现象**：',
+  '',
+  '**怎么出现的**：在哪个页面、点了什么操作',
+  '',
+  '**复现步骤**：',
+  '1. ',
+  '2. ',
+  '3. ',
+  '',
+  '**期望结果**：',
+  '',
+  '**实际结果**：'
+].join('\n');
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', (e) => {
+    const btn = e.target && e.target.closest ? e.target.closest('#copyTemplateBtn') : null;
+    if (!btn) return;
+    const original = btn.dataset.label || btn.innerHTML;
+    btn.dataset.label = original;
+    copyText(TEMPLATE_TEXT).then((ok) => {
+      btn.innerHTML = ok ? icon('copy') + ' ✅ 已复制' : '❌ 复制失败，可手动写';
+      setTimeout(() => { btn.innerHTML = original; }, 1600);
+    });
   });
 }
 

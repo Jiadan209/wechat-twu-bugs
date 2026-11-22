@@ -1,5 +1,5 @@
 import {
-  GITHUB_CONFIG, DRAFT_KEY, SUBMIT_LIMIT_KEY, SUBMIT_COOLDOWN_MS
+  GITHUB_CONFIG, DRAFT_KEY, NICKNAME_KEY, SUBMIT_LIMIT_KEY, SUBMIT_COOLDOWN_MS
 } from './config.js';
 import { $, readLocal, writeLocal, removeLocal } from './utils.js';
 
@@ -17,6 +17,20 @@ export function setSeverity(value) {
   Array.prototype.forEach.call(radios, (radio) => {
     radio.checked = radio.value === target;
   });
+}
+
+/* ---------- 昵称记忆 ---------- */
+/* 只记昵称，不记邮箱：邮箱会公开显示，留存在本地反而容易误填 */
+export function rememberNickname() {
+  const name = ($('#nickname').value || '').trim();
+  if (name) writeLocal(NICKNAME_KEY, name);
+}
+
+export function restoreNickname() {
+  const field = $('#nickname');
+  if (!field || field.value.trim()) return;
+  const name = readLocal(NICKNAME_KEY);
+  if (typeof name === 'string' && name.trim()) field.value = name.trim();
 }
 
 /* ---------- 草稿 ---------- */

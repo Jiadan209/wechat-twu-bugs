@@ -13,6 +13,7 @@ export const ISSUE_MAX_PAGES = 3;
 export const DUPLICATE_THRESHOLD = 0.6;
 
 export const DRAFT_KEY = 'wechat_twu_bug_draft';
+export const NICKNAME_KEY = 'wechat_twu_last_nickname';
 export const SUBMIT_LIMIT_KEY = 'wechat_twu_last_submit';
 export const SUBMIT_COOLDOWN_MS = 3 * 60 * 1000;
 
