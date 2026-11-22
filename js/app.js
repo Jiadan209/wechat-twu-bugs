@@ -180,11 +180,13 @@ function bindEvents() {
   $('#refreshBtn').addEventListener('click', () => issues.loadIssues({ force: true }));
 
   $('#searchInput').addEventListener('input', debounce(() => {
+    issues.resetPaging();
     issues.renderIssues();
     syncFilterUrl();
   }, 250));
 
   $('#sortFilter').addEventListener('change', () => {
+    issues.resetPaging();
     issues.renderIssues();
     syncFilterUrl();
   });
@@ -300,6 +302,40 @@ function bindEvents() {
   });
 }
 
+/* ---------- 键盘快捷键：/ 搜索、↑↓ 移动、Esc 关弹窗 ---------- */
+function bindShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    if ($('#issueModal').classList.contains('active')) return;  // 弹窗自己有 Esc / Tab 逻辑
+
+    const el = e.target || {};
+    const tag = el.tagName || '';
+    const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || !!el.isContentEditable;
+
+    if (e.key === '/' && !typing) {
+      e.preventDefault();
+      const search = $('#searchInput');
+      if (!search) return;
+      search.focus();
+      search.select();
+      return;
+    }
+
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !typing) {
+      const items = Array.prototype.slice.call(
+        document.querySelectorAll('#issuesContainer .issue-item')
+      );
+      if (!items.length) return;
+      e.preventDefault();
+      const idx = items.indexOf(document.activeElement);
+      const next = e.key === 'ArrowDown'
+        ? Math.min(idx + 1, items.length - 1)
+        : Math.max(idx - 1, 0);
+      items[next].focus();
+      items[next].scrollIntoView({ block: 'nearest' });
+    }
+  });
+}
+
 /* ---------- 深链：?issue=5 直接打开对应报告 ---------- */
 function openFromUrl() {
   let n = 0;
@@ -359,6 +395,7 @@ function showVersionBadge() {
 /* ---------- 初始化 ---------- */
 function init() {
   bindEvents();
+  bindShortcuts();
   initTabs();
   readFiltersFromUrl();
   form.updateAllCounters();
@@ -371,9 +408,8 @@ function init() {
     form.restoreNickname();
   }
 
-  issues.loadIssues();
-
-  openFromUrl();
+  /* 先等列表就位再处理 ?issue=N：这样弹窗能立刻用上缓存里的数据 */
+  issues.loadIssues().then(() => openFromUrl());
 }
 
 if (document.readyState === 'loading') {

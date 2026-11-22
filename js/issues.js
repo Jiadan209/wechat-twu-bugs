@@ -27,6 +27,40 @@ export function parseType(body) {
   return TYPE_ORDER.indexOf(raw) !== -1 ? raw : '其他';
 }
 
+/* 中文标题通常没有空格，按「字二元组」比较比按词更稳 */
+function charBigrams(text) {
+  const clean = String(text || '')
+    .toLowerCase()
+    .replace(/[\s，,。.、\/\\|;；:：!！?？()（）\[\]【】"“”'‘’]+/g, '');
+  const set = {};
+  for (let i = 0; i < clean.length - 1; i++) set[clean.substr(i, 2)] = true;
+  return set;
+}
+
+/* 相似报告：给弹窗用，返回与当前标题最接近的几条 */
+export function similarIssues(target, limit) {
+  if (!target || !target.title) return [];
+  const base = charBigrams(target.title);
+  const size = Object.keys(base).length;
+  if (!size) return [];
+
+  const scored = [];
+  state.allIssues.forEach((issue) => {
+    if (issue.number === target.number) return;
+    const other = charBigrams(issue.title);
+    let hits = 0;
+    Object.keys(other).forEach((bg) => { if (base[bg]) hits++; });
+    const score = hits / size;
+    if (score >= 0.25) scored.push({ issue: issue, score: score });
+  });
+
+  scored.sort((a, b) =>
+    (b.score - a.score) ||
+    ((a.issue.state === 'open' ? 0 : 1) - (b.issue.state === 'open' ? 0 : 1)));
+
+  return scored.slice(0, limit || 3).map((entry) => entry.issue);
+}
+
 /* ---------- 骨架屏 / 错误 ---------- */
 function renderSkeleton(container) {
   container.innerHTML =
@@ -88,8 +122,14 @@ function scheduleRefreshLabel() {
   refreshLabelTimer = setInterval(paint, 10000);
 }
 
+/* 换筛选 / 搜索 / 排序时回到第一屏，避免还停在上一次「显示更多」的位置 */
+export function resetPaging() {
+  state.renderLimit = 20;
+}
+
 /* ---------- 快捷筛选 ---------- */
 export function setQuickFilter(name) {
+  resetPaging();
   const allowed = ['all', 'open', 'urgent', 'closed'];
   state.quick = allowed.indexOf(name) !== -1 ? name : 'all';
 
@@ -160,6 +200,52 @@ function updateStats(list) {
   $('#statWeek').textContent = week;
 
   renderTypeBreakdown(list);
+  renderWeekTrend(list);
+}
+
+/* 「最近 7 天新增」迷你柱图：一条都没有时整块隐藏 */
+function renderWeekTrend(list) {
+  const box = $('#weekTrend');
+  if (!box) return;
+
+  if (!list.length) {
+    box.hidden = true;
+    box.innerHTML = '';
+    return;
+  }
+  box.hidden = false;
+
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const start = new Date(today.getTime() - i * DAY_MS);
+    const end = new Date(start.getTime() + DAY_MS);
+    const count = list.filter((issue) => {
+      const created = new Date(issue.created_at);
+      return created >= start && created < end;
+    }).length;
+    days.push({ start: start, count: count });
+  }
+
+  const total = days.reduce((sum, d) => sum + d.count, 0);
+  const max = Math.max.apply(null, days.map((d) => d.count).concat([1]));
+
+  box.innerHTML =
+    '<div class="trend-title">最近 7 天新增（共 ' + total + ' 条）</div>' +
+    '<div class="trend-bars">' +
+    days.map((d) => {
+      const h = d.count ? Math.max(Math.round((d.count / max) * 100), 12) : 2;
+      return '<div class="trend-col" title="' +
+        (d.start.getMonth() + 1) + '/' + d.start.getDate() + ' 新增 ' + d.count + ' 条">' +
+        '<span class="trend-num">' + (d.count || '') + '</span>' +
+        '<div class="trend-bar' + (d.count ? '' : ' is-empty') + '" style="height:' + h + '%"></div>' +
+        '<span class="trend-day">' + (d.start.getMonth() + 1) + '/' + d.start.getDate() + '</span>' +
+        '</div>';
+    }).join('') +
+    '</div>';
 }
 
 /* 「问题类型分布」横条：比四个数字更能说明问题集中在哪 */
@@ -289,7 +375,10 @@ export function renderIssues() {
     return;
   }
 
-  const html = list.map((issue) => {
+  /* 一次只渲染前 N 条，剩下的用「显示更多」追加，长列表也不卡 */
+  const shown = list.slice(0, state.renderLimit);
+
+  const html = shown.map((issue) => {
     const isOpen = issue.state === 'open';
     const sev = parseSeverity(issue.body);
     const date = new Date(issue.created_at).toLocaleDateString('zh-CN');
@@ -317,14 +406,28 @@ export function renderIssues() {
       '</li>';
   }).join('');
 
-  container.innerHTML = note + '<ul class="issues-list">' + html + '</ul>';
+  const remain = list.length - shown.length;
+  const moreHtml = remain > 0
+    ? '<div class="load-more-wrap"><button type="button" class="btn btn-ghost btn-sm" id="loadMoreBtn">' +
+        '显示更多（还剩 ' + remain + ' 条）</button></div>'
+    : '';
+
+  container.innerHTML = note + '<ul class="issues-list">' + html + '</ul>' + moreHtml;
 }
 
-/* 兜底提示里的「重试」：强制刷新，跳过限流冷却。用委托实现，避免每次重渲染都要重新绑定 */
+/* 兜底提示里的「重试」与列表的「显示更多」：都用事件委托，避免每次重渲染重新绑定 */
 if (typeof document !== 'undefined') {
   document.addEventListener('click', (e) => {
-    if (!e.target || e.target.id !== 'staleRetryBtn') return;
-    loadIssues({ force: true });
+    if (!e.target) return;
+    if (e.target.id === 'staleRetryBtn') {
+      loadIssues({ force: true });
+      return;
+    }
+    /* 「显示更多」：每次多放 20 条 */
+    if (e.target.id === 'loadMoreBtn') {
+      state.renderLimit += 20;
+      renderIssues();
+    }
   });
 }
 

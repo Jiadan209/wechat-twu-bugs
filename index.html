@@ -335,6 +335,90 @@
       font-size: 0.72rem;
       font-variant-numeric: tabular-nums;
     }
+
+    /* 11. 最近 7 天趋势 / 相似报告 / 显示更多 */
+    .week-trend {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg-soft);
+    }
+    .trend-title {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+    }
+    .trend-bars {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      align-items: end;
+      gap: 6px;
+      height: 64px;
+    }
+    .trend-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+    .trend-bar {
+      width: 100%;
+      min-height: 2px;
+      border-radius: 4px 4px 0 0;
+      background: var(--green);
+      transition: height 0.3s ease;
+    }
+    .trend-bar.is-empty { background: var(--border); }
+    .trend-num {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .trend-day {
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .modal-related {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 0 0 12px;
+    }
+    .modal-related:empty { display: none; }
+    .related-label {
+      flex-basis: 100%;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .related-link {
+      padding: 3px 9px;
+      font-family: inherit;
+      font-size: 0.72rem;
+      color: var(--text-sub);
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color 0.16s ease, border-color 0.16s ease;
+    }
+    .related-link:hover { color: var(--green-text); border-color: var(--green); }
+
+    .load-more-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 12px 0 2px;
+    }
   </style>
 </head>
 <body data-active-tab="form">
@@ -562,6 +646,9 @@
           <!-- 问题类型分布：由 issues.js 渲染 -->
           <div class="type-breakdown" id="typeBreakdown" aria-live="polite"></div>
 
+          <!-- 最近 7 天新增趋势：由 issues.js 渲染 -->
+          <div class="week-trend" id="weekTrend" aria-live="polite"></div>
+
           <div class="issues-section">
             <div class="issues-header">
               <h2>
@@ -615,6 +702,7 @@
       </div>
       <div class="modal-body">
         <div class="modal-meta" id="modalMeta"></div>
+        <div class="modal-related" id="modalRelated"></div>
         <div class="modal-body-content" id="modalBody"></div>
         <div class="modal-comments" id="modalComments"></div>
       </div>
