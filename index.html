@@ -306,6 +306,35 @@
       .truncate-note.stale-note { color: #fcd34d; background: rgba(245, 158, 11, 0.14); }
       .field-hint { color: #fbbf24; }
     }
+
+    /* 10. 筛选计数 / 空状态模板按钮 / 页脚版本号 */
+    .count-badge.is-filtered {
+      color: #b45309;
+      background: rgba(245, 158, 11, 0.14);
+      border-color: rgba(245, 158, 11, 0.4);
+      font-variant-numeric: tabular-nums;
+    }
+    .issues-empty .empty-actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .btn-sm {
+      padding: 7px 12px;
+      font-size: 0.78rem;
+      font-family: inherit;
+    }
+    .footnote-version {
+      margin-left: 8px;
+      padding: 1px 7px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-variant-numeric: tabular-nums;
+    }
   </style>
 </head>
 <body data-active-tab="form">
@@ -316,7 +345,7 @@
     <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.6"/><path d="M20 4v4h-4"/></symbol>
     <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 8 6 8-16-8z"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="3" width="11" height="14" rx="2"/><path d="M15 20H6a2 2 0 0 1-2-2V7"/></symbol>
-    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l2.3-2.3a4 4 0 0 0-5.7-5.7"/><path d="M14 10a4 4 0 1 0-5.7 0L6 12.3a4 4 0 0 0 5.7 5.7"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l2.3-2.3a4 4 0 0 0-5.7-5.7"/><path d="M14 10a4 4 0 0 0-5.7 0L6 12.3a4 4 0 0 0 5.7 5.7"/></symbol>
   </svg>
   <noscript>
     <div style="padding: 24px; margin: 24px; text-align: center; background: #fee2e2; color: #991b1b; border-radius: 10px; font-family: -apple-system, sans-serif;">
@@ -557,6 +586,7 @@
                      aria-label="搜索 Bug 报告" autocomplete="off">
               <select id="sortFilter" aria-label="排序方式">
                 <option value="created">最新创建</option>
+                <option value="severity">最严重优先</option>
                 <option value="comments">最多评论</option>
                 <option value="updated">最近更新</option>
               </select>
@@ -571,6 +601,7 @@
 
       <div class="footnote">
         ⚡ 微信twu · 由 TurboWarp 驱动 · 提交后将打开 GitHub Issues 页面
+        <span class="footnote-version" id="versionBadge" aria-label="站点版本"></span>
       </div>
     </div>
   </div>
