@@ -1,15 +1,17 @@
 {
   "name": "wechat-twu-bugs",
   "version": "2.8.0",
-  "description": "微信twu 的 Bug 汇报站：纯静态页面，提交到 GitHub Issues",
+  "private": true,
   "type": "module",
+  "description": "微信twu 聊天作品的 Bug 汇报站（纯静态 + GitHub Issues）",
   "scripts": {
-    "serve": "python3 -m http.server 8000",
+    "test": "node --test tests/*.test.mjs",
     "lint:syntax": "node scripts/check-syntax.mjs",
     "lint:html": "node scripts/check-html.mjs",
-    "test": "node --test tests/*.test.mjs",
-    "check": "npm run lint:syntax && npm run lint:html && npm test"
+    "check": "npm run lint:syntax && npm run lint:html && npm test",
+    "serve": "python3 -m http.server 8000"
   },
-  "license": "MIT",
-  "private": true
+  "engines": {
+    "node": ">=20"
+  }
 }
