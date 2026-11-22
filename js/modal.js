@@ -2,6 +2,7 @@ import { GITHUB_CONFIG } from './config.js';
 import { $, escapeHtml, copyText } from './utils.js';
 import { state } from './store.js';
 import { renderMarkdown } from './markdown.js';
+import { similarIssues } from './issues.js';
 import { fetchIssueDetail, fetchComments } from './api.js';
 
 /* ---------- 深链：?issue=5 ---------- */
@@ -178,6 +179,26 @@ function renderModalContent(issue) {
   const ghLink = $('#modalGithubLink');
   ghLink.href = issue.html_url ||
     ('https://github.com/' + GITHUB_CONFIG.owner + '/' + GITHUB_CONFIG.repo + '/issues/' + issue.number);
+
+  /* 可能相关的报告：复用相似度算法，直接在弹窗里给跳转入口 */
+  const related = similarIssues(issue, 3);
+  $('#modalRelated').innerHTML = related.length
+    ? '<span class="related-label">可能相关</span>' +
+      related.map((r) =>
+        '<button type="button" class="related-link" data-issue="' + r.number + '">' +
+          '#' + r.number + ' ' + escapeHtml(r.title) + '</button>'
+      ).join('')
+    : '';
+}
+
+/* 弹窗里点「可能相关」：直接换成那一条 */
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', (e) => {
+    const btn = e.target && e.target.closest ? e.target.closest('.related-link') : null;
+    if (!btn) return;
+    const n = Number(btn.dataset.issue);
+    if (Number.isInteger(n) && n > 0) openIssueModal(n);
+  });
 }
 
 function renderComment(c) {
@@ -235,6 +256,7 @@ export async function openIssueModal(issueNumber) {
 
   $('#modalTitle').textContent = '加载中…';
   $('#modalMeta').innerHTML = '';
+  $('#modalRelated').innerHTML = '';
   $('#modalBody').innerHTML = '<div class="comments-loading">⏳ 正在加载详情…</div>';
   $('#modalComments').innerHTML = '';
   $('#modalGithubLink').href =
